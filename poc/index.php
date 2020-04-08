@@ -56,6 +56,10 @@ function show_recent_locations($num){
          $mapsurl = "https://maps.google.com/maps?q=$address,$city,$province,$postal";
          $mapsurl = str_replace(" ", "+", $mapsurl);
          
+         if (!empty($website)){
+            $name = "<A HREF=$website>$name</A>";
+         }
+         
          $content = "'<div id=\"content\"><B>$name</B><BR>$address,$city,$province,$postal<BR>Phone: <A HREF=tel:$phone>$phone</A><BR><B>Services:</B>$service_list<BR><A HREF=\"$mapsurl\">Open In Google Maps</A></div>'";
          
          $iw = "infowindow = new google.maps.InfoWindow({content: $content});";
