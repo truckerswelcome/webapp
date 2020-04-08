@@ -1,5 +1,5 @@
 <?php
-require_once("nogit/creds.php");
+require_once("/var/opt/webapp/nogit/creds.php");
 
 function show_recent_locations($num){
    global $servername;
@@ -62,10 +62,11 @@ function show_recent_locations($num){
          
          $content = "'<div id=\"content\"><B>$name</B><BR>$address,$city,$province,$postal<BR>Phone: <A HREF=tel:$phone>$phone</A><BR><B>Services:</B>$service_list<BR><A HREF=\"$mapsurl\">Open In Google Maps</A></div>'";
          
-         $iw = "infowindow = new google.maps.InfoWindow({content: $content});";
+         $iw = "var infowindow$rowid = new google.maps.InfoWindow({content: $content});\n";
+         $iw .= "infoWindows.push(infowindow$rowid);";
          $ll = "latLng = {lat: $lat, lng: $long};";
          $m  = "marker$rowid = new google.maps.Marker({position: latLng,map: map,title: '$name'});";
-         $al = "marker$rowid.addListener('click', function() {infowindow.open(map, marker$rowid);});";
+         $al = "marker$rowid.addListener('click', function() {closeAllInfoWindows(); infowindow$rowid.open(map, marker$rowid);});";
          
          echo "$iw\n\n$ll\n\n$m\n\n$al\n";
          
@@ -92,6 +93,7 @@ function phone_number_format($number) {
     <link rel="stylesheet" href="/bootstrap/css/bootstrap.min.css">
     <script src="/jquery/jquery-3.4.1.min.js"></script>
     <script src="/bootstrap/js/bootstrap.min.js"></script>
+    <script src="/js/map.js"></script>
     <title>Truckers Welcome</title>
   <style>
     #map {
@@ -116,45 +118,39 @@ function phone_number_format($number) {
    &nbsp;&nbsp;<button type="button" class="btn btn-info" onclick="window.location.href = '/about.html';">About</button>
    </CENTER>
 
-  <!-- Locate Modal -->
-  <div class="modal fade" id="locateModal" role="dialog">
-    <div class="modal-dialog">
-    
-      <!-- Modal content-->
-      <div class="modal-content">
-        <div class="modal-header">
-          <h4 class="modal-title">Locate a business</h4>
-        </div>
-        <div class="modal-body">
-		<p>Choose the service(s) you need (Mockup only - not functional yet):</P>
-	  <FORM>
-		  <input type="checkbox" id="wr" name="rw" value="Washroom">
-                  <label for="takeout"> Washroom</label><br>
+<!-- Locate Modal -->
+<div class="modal fade" id="locateModal" role="dialog">
+<div class="modal-dialog">
 
-		  <input type="checkbox" id="br" name="br" value="Shower">
-                  <label for="takeout"> Shower</label><br>
+<!-- Modal content-->
+<div class="modal-content">
+<div class="modal-header">
+<h4 class="modal-title">Locate a business</h4>
+</div>
+<div class="modal-body">
+<p>Choose the service(s) you need (Mockup only - not functional yet):</P>
+<FORM>
+<input type="checkbox" id="wr" name="rw" value="Washroom">
+   <label for="takeout"> Washroom</label><br>
+<input type="checkbox" id="br" name="br" value="Shower">
+   <label for="takeout"> Shower</label><br>
+<input type="checkbox" id="pr" name="rr" value="Rest stop">
+   <label for="takeout"> Rest stop</label><br>
+<input type="checkbox" id="cs" name="cs" value="Coffee / Snacks">
+   <label for="takeout"> Coffee / Snacks</label><br>
+<input type="checkbox" id="dt" name="dt" value="Drive through">
+   <label for="takeout"> Drive Through (meal)</label><br>
+<input type="checkbox" id="wt" name="wt" value="Walk through">
+   <label for="takeout"> Walk Through (meal)</label><br>
+</FORM>
+</div>
+<div class="modal-footer">
+<button type="button" class="btn btn-default" data-dismiss="modal">Find</button>
+</div>
+</div>
 
-		  <input type="checkbox" id="pr" name="rr" value="Rest stop">
-                  <label for="takeout"> Rest stop</label><br>
-
-		  <input type="checkbox" id="cs" name="cs" value="Coffee / Snacks">
-                  <label for="takeout"> Coffee / Snacks</label><br>
-
-		  <input type="checkbox" id="dt" name="dt" value="Drive through">
-                  <label for="takeout"> Drive Through (meal)</label><br>
-
-		  <input type="checkbox" id="wt" name="wt" value="Walk through">
-                  <label for="takeout"> Walk Through (meal)</label><br>
-	  
-	  </FORM>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-default" data-dismiss="modal">Find</button>
-        </div>
-      </div>
-      
-    </div>
-  </div>
+</div>
+</div>
 </div>
 
   <!-- Locate Modal -->
@@ -194,8 +190,6 @@ function phone_number_format($number) {
   </div>
 </div>
 
-
-
     </div>
 
     <div><select id="locationSelect" style="width: 10%; visibility: hidden"></select></div>
@@ -203,22 +197,51 @@ function phone_number_format($number) {
     <script>
       var map;
       var markers = [];
+      var infoWindows = [];
       var infoWindow;
       var locationSelect;
       var latLng;
 
       function initMap() {
-       var toronto = {lat: 43.651070, lng: -79.347015};
-       map = new google.maps.Map(document.getElementById('map'), {
-         center: toronto,
-         zoom: 9,
-         mapTypeId: 'roadmap',
-         mapTypeControlOptions: {style: google.maps.MapTypeControlStyle.DROPDOWN_MENU}
-       });
-       infoWindow = new google.maps.InfoWindow();
+         var mtl = {lat: 45.50170, lng: -73.5673};
+         map = new google.maps.Map(document.getElementById('map'), {
+               center: mtl,
+               zoom: 9,
+               mapTypeId: 'roadmap',
+               mapTypeControl: false,
+               mapTypeControlOptions: {style: google.maps.MapTypeControlStyle.DROPDOWN_MENU}
+         });
+         infoWindow = new google.maps.InfoWindow();
 
-       <?php show_recent_locations(20); ?>
+         <?php show_recent_locations(20); ?>
 
+         if (navigator.geolocation) {
+         // try to geolocate and load search results
+         navigator.geolocation.getCurrentPosition(
+            function (position) {
+                if (doGeolocationSearch) {
+                    centerOnCoordinates({
+                        lat: position.coords.latitude,
+                        lng: position.coords.longitude
+                    }, true);
+                }
+            },
+            function (err) {
+                // geolocate failure
+               const toronto = {
+                   lat: 43.6532,
+                   lng: -79.3832
+               };
+               centerOnCoordinates(toronto);
+               console.warn(`Geolocate Error(${err.code}): ${err.message}`);
+            },
+            {
+                enableHighAccuracy: true,
+                timeout: 5000,
+                maximumAge: 0
+            }
+         );
+         }
       }
   </script>
     <script async defer
