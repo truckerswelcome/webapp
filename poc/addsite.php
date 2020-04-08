@@ -13,6 +13,7 @@ if (array_key_exists('bizname', $_POST)){
    // Initiatlize the parameters that will be set based on the form input
    $lat=0;
    $long=0;
+   $diesel = 0;
    $washroom = 0;
    $shower = 0;
    $parking = 0;
@@ -37,9 +38,17 @@ if (array_key_exists('bizname', $_POST)){
    $bemail     = mysqli_real_escape_string($conn,htmlspecialchars(stripslashes($_POST['bemail'])));
    $phone      = mysqli_real_escape_string($conn,htmlspecialchars(stripslashes($_POST['phone'])));
    $website    = mysqli_real_escape_string($conn,htmlspecialchars(stripslashes($_POST['website'])));
-   $modpin    = mysqli_real_escape_string($conn,htmlspecialchars(stripslashes($_POST['modpin'])));
+   $modpin     = mysqli_real_escape_string($conn,htmlspecialchars(stripslashes($_POST['modpin'])));
+   $other      = mysqli_real_escape_string($conn,htmlspecialchars(stripslashes($_POST['other'])));
 
    // Extract what facilities have been selected by expecting a specific checkbox value to be "on". Ignore other values
+   if (array_key_exists('diesel', $_POST)){
+      if ("on" == mysqli_real_escape_string($conn,htmlspecialchars(stripslashes($_POST['diesel'])))){
+         $diesel = true;
+         $cdiesel = "checked";
+      }
+   }
+   
    if (array_key_exists('washroom', $_POST)){
       if ("on" == mysqli_real_escape_string($conn,htmlspecialchars(stripslashes($_POST['washroom'])))){
          $washroom = true;
@@ -107,6 +116,7 @@ if (array_key_exists('bizname', $_POST)){
    if (strlen($phone) > 16) $form_errors['Phone'] = 'Invalid';
    if (strlen($website) > 512) $form_errors['Website'] = 'Invalid';
    if (strlen($modpin) > 5) $form_errors['Moderator PIN'] = 'Invalid';
+   if (strlen($other) > 255) $form_errors['Other'] = 'Too long';
 
    // If the user submitting the data is a moderator, we need to know so we can mark the data as valid immediately
    // So if this is a moderator, expect a PIN (temporary solution until we have users/roles)
@@ -172,7 +182,7 @@ if (array_key_exists('bizname', $_POST)){
    }else{
       // If we are here there was no error with the form data, so add it to the DB and move on
       
-      $sql = "INSERT INTO facilities (submitted_by,submitter_type,name,address,city,province_state,country,postal,email,phone,website,approved,washroom,shower,reststop,coffee,snacks,meal,drivethrough,walkthrough,lat,lng) VALUES ('$submitter_name', '$submitter_type', '$bizname', '$street', '$city', '$province', '$country', '$postal', '$bemail', '$phone', '$website', $approved, $washroom, $shower, $parking, $coffee, $snacks, $meal, $drivethrough, $walkup,$lat,$long)";
+      $sql = "INSERT INTO facilities (submitted_by,submitter_type,name,address,city,province_state,country,postal,email,phone,website,approved,diesel,washroom,shower,reststop,coffee,snacks,meal,drivethrough,walkthrough,otherservices,lat,lng) VALUES ('$submitter_name', '$submitter_type', '$bizname', '$street', '$city', '$province', '$country', '$postal', '$bemail', '$phone', '$website', $approved, $diesel, $washroom, $shower, $parking, $coffee, $snacks, $meal, $drivethrough, $walkup, '$other', $lat,$long)";
       
       if ($conn->query($sql) === TRUE) {
          $msg = "Added $bizname - Add another location";
@@ -199,6 +209,7 @@ if (array_key_exists('bizname', $_POST)){
          $meal = false;
          $drivethrough = false;
          $walkup = false;
+         $diesel = false;
          
          $cwashroom = "";
          $cshower = "";
@@ -208,6 +219,7 @@ if (array_key_exists('bizname', $_POST)){
          $cmeal = "";
          $cdrivethrough = "";
          $cwalkup = "";
+         $cdiesel = "";
       } else {
          $msg = "Error adding location<BR>";
          $msg2 = "$conn->error<BR>$sql";
@@ -241,8 +253,8 @@ if (array_key_exists('bizname', $_POST)){
    <option>Who are you?</option>
    <option>Driver</option>
    <option>Facility Owner</option>
-   <option>Moderator</option>
    <option>Other</option>
+   <option>Moderator</option>
    </select>   
 
    <input type="text" class="form-control" id="bizname" name="bizname" placeholder="Business Name, (e.g. Tim Hortons)" <?php echo "value=\"$bizname\""?>>
@@ -257,6 +269,9 @@ if (array_key_exists('bizname', $_POST)){
    <div id="modpindiv" style="display: none;"><input type="text" class="form-control" id="modpin" name="modpin" placeholder="Moderator PIN" <?php echo "value=\"$modpin\""?>></div>
 </div>
 <B>Services available at this location</B>
+<div class="checkbox">
+ <label><input type="checkbox" id="diesel" name="diesel" <?php echo $cdiesel;?>> Diesel</label>
+</div>
 <div class="checkbox">
  <label><input type="checkbox" id="washroom" name="washroom" <?php echo $cwashroom;?>> Washroom</label>
 </div>
@@ -281,7 +296,10 @@ if (array_key_exists('bizname', $_POST)){
 <div class="checkbox">
  <label><input type="checkbox" id="walkup" name="walkup" <?php echo $cwalkup;?>> Walk Through (walk up to drivethrough window)</label>
 </div>
-
+<div>
+   <input type="text" class="form-control" id="other" name="other" placeholder="Other (e.g. Lounge,TV)" <?php echo "value=\"$other\""?>>
+</div>
+<BR>
 <button type="submit" class="btn btn-primary">Submit</button>
 
 <script>
