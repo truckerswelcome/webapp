@@ -1,16 +1,16 @@
 <?php
-require_once("nogit/creds.php");
+require_once("/var/opt/webapp/nogit/creds.php");
 
 $msg = "Add a site";
 
 if (array_key_exists('bizname', $_POST)){
-   $conn = new mysqli($servername, $username, $password, $dbname);
-   // Check connection
-   if ($conn->connect_error) {
-       die("Connection failed: " . $conn->connect_error);
+   try {
+      $dbh = new PDO("mysql:host=$servername;dbname=$dbname", $username, $password);
+   } catch (PDOException $e) {
+      die("Connection failed: " . $e->getMessage() . "\n");
    }
-   
-   // Initiatlize the parameters that will be set based on the form input
+
+   // Initialize the parameters that will be set based on the form input
    $lat=0;
    $long=0;
    $diesel = 0;
@@ -26,78 +26,49 @@ if (array_key_exists('bizname', $_POST)){
    $form_errors = array();
    
    // Extract form data safely
-   $submitter_name = trim(stripslashes(mysqli_real_escape_string($conn,htmlspecialchars(stripslashes($_POST['uname'])))));
-   $submitter_type = mysqli_real_escape_string($conn,htmlspecialchars(stripslashes($_POST['whoareyou'])));
-   
-   $bizname    = mysqli_real_escape_string($conn,htmlspecialchars(stripslashes($_POST['bizname'])));
-   $street     = mysqli_real_escape_string($conn,htmlspecialchars(stripslashes($_POST['street'])));
-   $city       = mysqli_real_escape_string($conn,htmlspecialchars(stripslashes($_POST['city'])));
-   $province   = mysqli_real_escape_string($conn,htmlspecialchars(stripslashes($_POST['province'])));
-   $country    = mysqli_real_escape_string($conn,htmlspecialchars(stripslashes($_POST['country'])));
-   $postal     = mysqli_real_escape_string($conn,htmlspecialchars(stripslashes($_POST['postal'])));
-   $bemail     = mysqli_real_escape_string($conn,htmlspecialchars(stripslashes($_POST['bemail'])));
-   $phone      = mysqli_real_escape_string($conn,htmlspecialchars(stripslashes($_POST['phone'])));
-   $website    = mysqli_real_escape_string($conn,htmlspecialchars(stripslashes($_POST['website'])));
-   $modpin     = mysqli_real_escape_string($conn,htmlspecialchars(stripslashes($_POST['modpin'])));
-   $other      = mysqli_real_escape_string($conn,htmlspecialchars(stripslashes($_POST['other'])));
+   $submitter_name = filter_input(INPUT_POST, 'uname', FILTER_SANITIZE_STRING);
+   $submitter_type = filter_input(INPUT_POST, 'whoareyou', FILTER_SANITIZE_STRING);
+
+   $bizname    = filter_input(INPUT_POST, 'bizname', FILTER_SANITIZE_STRING);
+   $street     = filter_input(INPUT_POST, 'street', FILTER_SANITIZE_STRING);
+   $city       = filter_input(INPUT_POST, 'city', FILTER_SANITIZE_STRING);
+   $province   = filter_input(INPUT_POST, 'province', FILTER_SANITIZE_STRING);
+   $country    = filter_input(INPUT_POST, 'country', FILTER_SANITIZE_STRING);
+   $postal     = filter_input(INPUT_POST, 'postal', FILTER_SANITIZE_STRING);
+   $bemail     = filter_input(INPUT_POST, 'bemail', FILTER_SANITIZE_STRING);
+   $phone      = filter_input(INPUT_POST, 'phone', FILTER_SANITIZE_STRING);
+   $website    = filter_input(INPUT_POST, 'website', FILTER_SANITIZE_STRING);
+   $modpin     = filter_input(INPUT_POST, 'modpin', FILTER_SANITIZE_STRING);
+   $other      = filter_input(INPUT_POST, 'other', FILTER_SANITIZE_STRING);
 
    // Extract what facilities have been selected by expecting a specific checkbox value to be "on". Ignore other values
-   if (array_key_exists('diesel', $_POST)){
-      if ("on" == mysqli_real_escape_string($conn,htmlspecialchars(stripslashes($_POST['diesel'])))){
-         $diesel = true;
-         $cdiesel = "checked";
-      }
-   }
-   
-   if (array_key_exists('washroom', $_POST)){
-      if ("on" == mysqli_real_escape_string($conn,htmlspecialchars(stripslashes($_POST['washroom'])))){
-         $washroom = true;
-         $cwashroom = "checked";
-      }
-   }
-   if (array_key_exists('shower', $_POST)){
-      if ("on" == mysqli_real_escape_string($conn,htmlspecialchars(stripslashes($_POST['shower'])))){
-         $shower = true;
-         $cshower = "checked";
-      }
-   }
-   if (array_key_exists('parking', $_POST)){
-      if ("on" == mysqli_real_escape_string($conn,htmlspecialchars(stripslashes($_POST['parking'])))){
-         $parking = true;
-         $cparking = "checked";
-      }
-   }
-   if (array_key_exists('coffee', $_POST)){
-      if ("on" == mysqli_real_escape_string($conn,htmlspecialchars(stripslashes($_POST['coffee'])))){
-         $coffee = true;
-         $ccoffee = "checked";
-      }
-   }
-   if (array_key_exists('snacks', $_POST)){
-      if ("on" == mysqli_real_escape_string($conn,htmlspecialchars(stripslashes($_POST['snacks'])))){
-         $snacks = true;
-         $csnacks = "checked";
-      }
-   }
-   if (array_key_exists('meal', $_POST)){
-      if ("on" == mysqli_real_escape_string($conn,htmlspecialchars(stripslashes($_POST['meal'])))){
-         $meal = true;
-         $cmeal = "checked";
-      }
-   }
-   if (array_key_exists('drivethrough', $_POST)){
-      if ("on" == mysqli_real_escape_string($conn,htmlspecialchars(stripslashes($_POST['drivethrough'])))){
-         $drivethrough = true;
-         $cdrivethrough = "checked";
-      }
-   }
-   if (array_key_exists('walkup', $_POST)){
-      if ("on" == mysqli_real_escape_string($conn,htmlspecialchars(stripslashes($_POST['walkup'])))){
-         $walkup = true;
-         $cwalkup = "checked";
-      }
-   }
-   
+   $diesel  = filter_input(INPUT_POST, 'diesel') == 'on' ? 1 : 0;
+   $cdiesel = $diesel ? 'checked' : '';
+
+   $washroom  = filter_input(INPUT_POST, 'washroom') == 'on' ? 1 : 0;
+   $cwashroom = $washroom ? 'checked' : '';
+
+   $shower  = filter_input(INPUT_POST, 'shower') == 'on' ? 1 : 0;
+   $cshower = $shower ? 'checked' : '';
+
+   $parking  = filter_input(INPUT_POST, 'parking') == 'on' ? 1 : 0;
+   $cparking = $parking ? 'checked' : '';
+
+   $coffee  = filter_input(INPUT_POST, 'coffee') == 'on' ? 1 : 0;
+   $ccoffee = $coffee ? 'checked' : '';
+
+   $snacks  = filter_input(INPUT_POST, 'snacks') == 'on' ? 1 : 0;
+   $csnacks = $snacks ? 'checked' : '';
+
+   $meal  = filter_input(INPUT_POST, 'meal') == 'on' ? 1 : 0;
+   $cmeal = $meal ? 'checked' : '';
+
+   $drivethrough  = filter_input(INPUT_POST, 'drivethrough') == 'on' ? 1 : 0;
+   $cdrivethrough = $drivethrough ? 'checked' : '';
+
+   $walkup  = filter_input(INPUT_POST, 'walkup') == 'on' ? 1 : 0;
+   $cwalkup = $walkup ? 'checked' : '';
+  
    if (!$washroom && !$shower && !$parking && !$coffee && !$snacks && !$meal && !$drivethrough && !$walkup){
       $form_errors['Services'] = 'You must offer at least one of the services';
    }
@@ -117,6 +88,15 @@ if (array_key_exists('bizname', $_POST)){
    if (strlen($website) > 512) $form_errors['Website'] = 'Invalid';
    if (strlen($modpin) > 5) $form_errors['Moderator PIN'] = 'Invalid';
    if (strlen($other) > 255) $form_errors['Other'] = 'Too long';
+
+   if (empty($submitter_name)) $form_errors['Your Name'] = 'Invalid';
+   if (empty($submitter_type)) $form_errors['Who are you'] = 'Invalid';
+   if (empty($bizname)) $form_errors['Business Name'] = 'Invalid';
+   if (empty($street)) $form_errors['Street Address'] = 'Invalid';
+   if (empty($city)) $form_errors['City'] = 'Invalid';
+   if (empty($province)) $form_errors['Province'] = 'Invalid';
+   if (empty($country)) $form_errors['Country'] = 'Invalid';
+   if (empty($postal)) $form_errors['Postal Code'] = 'Invalid';
 
    // If the user submitting the data is a moderator, we need to know so we can mark the data as valid immediately
    // So if this is a moderator, expect a PIN (temporary solution until we have users/roles)
@@ -182,51 +162,82 @@ if (array_key_exists('bizname', $_POST)){
    }else{
       // If we are here there was no error with the form data, so add it to the DB and move on
       
-      $sql = "INSERT INTO facilities (submitted_by,submitter_type,name,address,city,province_state,country,postal,email,phone,website,approved,diesel,washroom,shower,reststop,coffee,snacks,meal,drivethrough,walkthrough,otherservices,lat,lng) VALUES ('$submitter_name', '$submitter_type', '$bizname', '$street', '$city', '$province', '$country', '$postal', '$bemail', '$phone', '$website', $approved, $diesel, $washroom, $shower, $parking, $coffee, $snacks, $meal, $drivethrough, $walkup, '$other', $lat,$long)";
+      // but first, check for duplicate entry
+      $findquery = <<<EOD
+SELECT id from facilities where lat=? AND lng=?
+EOD;
+      $alreadyListed=0;
+      $fsth = $dbh->prepare($findquery);
+      $fparameters = [$lat, $long];
+      if ($fsth->execute($fparameters) === TRUE) {
+         $alreadyListed = $fsth->rowCount();
+         if ($alreadyListed)
+            echo "I'm sorry, there is already an entry for that address.<BR>";
+      }
       
-      if ($conn->query($sql) === TRUE) {
-         $msg = "Added $bizname - Add another location";
-         $msg2 = "";
-         
-         // Clear the variables used to persist form field values in the event of an error
-         $submitter_name = "";
-         $submitter_type = "";
-         $bizname    = "";
-         $street     = "";
-         $city       = "";
-         $province   = "";
-         $country    = "";
-         $postal     = "";
-         $bemail     = "";
-         $phone      = "";
-         $website    = "";
+      $sql = <<<EOD
+INSERT INTO facilities 
+   (submitted_by, submitter_type, name, address, city, province_state, country, postal, email, phone, website, approved, diesel, washroom, shower, reststop, coffee, snacks, meal, drivethrough, walkthrough, otherservices, lat, lng) 
+VALUES
+   (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+EOD;
 
-         $washroom = false;
-         $shower = false;
-         $parking = false;
-         $coffee = false;
-         $snacks = false;
-         $meal = false;
-         $drivethrough = false;
-         $walkup = false;
-         $diesel = false;
-         
-         $cwashroom = "";
-         $cshower = "";
-         $cparking = "";
-         $ccoffee = "";
-         $csnacks = "";
-         $cmeal = "";
-         $cdrivethrough = "";
-         $cwalkup = "";
-         $cdiesel = "";
-      } else {
-         $msg = "Error adding location<BR>";
-         $msg2 = "$conn->error<BR>$sql";
+      if (!$alreadyListed)
+      {
+         $sth = $dbh->prepare($sql);
+         $parameters = [
+            $submitter_name, $submitter_type,
+            $bizname, $street, $city, $province, $country, $postal,
+            $bemail, $phone, $website,
+            $approved,
+            $diesel, $washroom, $shower, $parking, $coffee, $snacks, $meal, $drivethrough, $walkup, $other,
+            $lat, $long
+         ];
+
+         if ($sth->execute($parameters) === TRUE) {
+            $msg = "Added $bizname - Add another location";
+            $msg2 = "";
+            
+            // Clear the variables used to persist form field values in the event of an error
+            $submitter_name = "";
+            $submitter_type = "";
+            $bizname    = "";
+            $street     = "";
+            $city       = "";
+            $province   = "";
+            $country    = "";
+            $postal     = "";
+            $bemail     = "";
+            $phone      = "";
+            $website    = "";
+
+            $washroom = false;
+            $shower = false;
+            $parking = false;
+            $coffee = false;
+            $snacks = false;
+            $meal = false;
+            $drivethrough = false;
+            $walkup = false;
+            $diesel = false;
+            
+            $cwashroom = "";
+            $cshower = "";
+            $cparking = "";
+            $ccoffee = "";
+            $csnacks = "";
+            $cmeal = "";
+            $cdrivethrough = "";
+            $cwalkup = "";
+            $cdiesel = "";
+         } else {
+            $msg = "Error adding location<BR>";
+            $msg2 = print_r($sth->errorInfo(), true)."<br/>$sql<br/>".print_r($parameters, true);
+         }
       }
    }
 
-   $conn->close();
+   $dbh = null;
 }
 
 ?>
@@ -246,7 +257,7 @@ if (array_key_exists('bizname', $_POST)){
    if (!empty($msg2)) 
       echo "Please report this error: $msg2";
 ?>
-<FORM method=POST action=addsite.php>
+<form method="post" action="addsite.php">
 <div class="form-group">
    <input type="text" class="form-control" id="uname" name="uname" placeholder="Your Name, (e.g. John Doe)" <?php echo "value=\"$submitter_name\""?>>
    <select class="form-control" id="whoareyou" name="whoareyou" onchange="checkWho()">
