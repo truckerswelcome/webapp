@@ -1,0 +1,6 @@
+#location {
+    left: 0.5em;
+    position: fixed;
+    top: 0.5em;
+    z-index: 10;
+}
