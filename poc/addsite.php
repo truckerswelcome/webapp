@@ -251,7 +251,7 @@ EOD;
    <title>Truckers Welcome - Add a site</title>
 </head>
 <body style="margin:10px; padding:10px;">
-<A HREF="/"><IMG src="/img/truck.png" width="80px"></A>
+<A HREF="index.php"><IMG src="img/truck.png" width="80px"></A>
 <H3><?php echo "$msg" ?></H3>
 <?php 
    if (!empty($msg2)) 

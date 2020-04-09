@@ -13,9 +13,9 @@
 
    <div>
       <div style="text-align: center;">
-         <button type="button" class="btn btn-success btn-sm" onclick="window.location.href = '/addsite.php';">Add Business</button>
-         <button type="button" class="btn btn-danger btn-sm" onclick="window.location.href = '/help.html';">Help</button>
-         <button type="button" class="btn btn-info btn-sm" onclick="window.location.href = '/about.html';">About</button>
+         <button type="button" class="btn btn-success btn-sm" onclick="window.location.href = 'addsite.php';">Add Business</button>
+         <button type="button" class="btn btn-danger btn-sm" onclick="window.location.href = 'help.html';">Help</button>
+         <button type="button" class="btn btn-info btn-sm" onclick="window.location.href = 'about.html';">About</button>
       </div>
 
       <!-- Locate Modal -->
