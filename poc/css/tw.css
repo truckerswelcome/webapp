@@ -60,6 +60,10 @@ html, body {
     height: 2em;
 }
 
+main {
+    height: 100%;
+}
+
 #search {
     align-items: center;
     background: #fff;
@@ -126,7 +130,7 @@ html, body {
 }
 
 #map {
-    height: 100vh;
+    height: 100%;
     width: 100%;
 }
 
