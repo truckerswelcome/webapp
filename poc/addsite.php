@@ -3,11 +3,65 @@ require_once("/var/opt/webapp/nogit/creds.php");
 
 $msg = "Add a site";
 
-if (array_key_exists('bizname', $_POST)){
+$dbh = 0;
+$entryid=0;
+if (array_key_exists('entryid', $_POST) && !array_key_exists('bizname', $_POST)){
+   // The form that was posted only contained the entryid, so it came from an Edit operation
+   // Use the entryid to pre-polulate the form
+   $entryid = filter_input(INPUT_POST, 'entryid', FILTER_SANITIZE_NUMBER_INT);
+
    try {
       $dbh = new PDO("mysql:host=$servername;dbname=$dbname", $username, $password);
    } catch (PDOException $e) {
       die("Connection failed: " . $e->getMessage() . "\n");
+   }
+
+   $findquery = <<<EOD
+SELECT * from facilities where id=?
+EOD;
+   $sth = $dbh->prepare($findquery);
+   $parameters = [$entryid];
+   if ($sth->execute($parameters) === TRUE) {
+      if ($sth->rowCount()){
+         $row = $sth->fetch(PDO::FETCH_ASSOC);
+
+         $submitter_name = "";
+         $modpin = "";
+
+         $cdiesel       = $row["diesel"] ? 'checked' : '';
+         $cwashroom     = $row["washroom"] ? 'checked' : '';
+         $cshower       = $row["shower"] ? 'checked' : '';
+         $cparking      = $row["reststop"] ? 'checked' : '';
+         $ccoffee       = $row["coffee"] ? 'checked' : '';
+         $csnacks       = $row["snacks"] ? 'checked' : '';
+         $cmeal         = $row["meal"] ? 'checked' : '';
+         $cdrivethrough = $row["drivethrough"] ? 'checked' : '';
+         $cwalkup       = $row["walkthrough"] ? 'checked' : '';
+         $other         = $row["otherservices"];
+
+         $bizname    = $row['name'];
+         $street     = $row['address'];
+         $city       = $row['city'];
+         $province   = $row['province_state'];
+         $country    = $row['country'];
+         $postal     = $row['postal'];
+         $phone      = $row['phone'];
+         $bemail     = $row['email'];
+         $website    = $row['website'];
+
+         $msg = "Edit entry for $bizname";
+      }
+   }
+}
+
+
+if (array_key_exists('bizname', $_POST)){
+   if (!$dbh){
+      try {
+         $dbh = new PDO("mysql:host=$servername;dbname=$dbname", $username, $password);
+      } catch (PDOException $e) {
+         die("Connection failed: " . $e->getMessage() . "\n");
+      }
    }
 
    // Initialize the parameters that will be set based on the form input
@@ -26,6 +80,11 @@ if (array_key_exists('bizname', $_POST)){
    $form_errors = array();
    
    // Extract form data safely
+   $entryid = 0;
+   if (array_key_exists('entryid', $_POST)){
+      $entryid = filter_input(INPUT_POST, 'entryid', FILTER_SANITIZE_NUMBER_INT);
+   }
+   
    $submitter_name = filter_input(INPUT_POST, 'uname', FILTER_SANITIZE_STRING);
    $submitter_type = filter_input(INPUT_POST, 'whoareyou', FILTER_SANITIZE_STRING);
 
@@ -68,6 +127,8 @@ if (array_key_exists('bizname', $_POST)){
 
    $walkup  = filter_input(INPUT_POST, 'walkup') == 'on' ? 1 : 0;
    $cwalkup = $walkup ? 'checked' : '';
+
+   $delete  = filter_input(INPUT_POST, 'delete') == 'on' ? 1 : 0;
   
    if (!$washroom && !$shower && !$parking && !$coffee && !$snacks && !$meal && !$drivethrough && !$walkup){
       $form_errors['Services'] = 'You must offer at least one of the services';
@@ -167,14 +228,16 @@ if (array_key_exists('bizname', $_POST)){
 SELECT id from facilities where lat=? AND lng=?
 EOD;
       $alreadyListed=0;
-      $fsth = $dbh->prepare($findquery);
-      $fparameters = [$lat, $long];
-      if ($fsth->execute($fparameters) === TRUE) {
-         $alreadyListed = $fsth->rowCount();
-         if ($alreadyListed)
-            echo "I'm sorry, there is already an entry for that address.<BR>";
-      }
-      
+      if (!$entryid){
+         // if this is not an UPDATE, check if there is already something in the database for the given location 
+         $fsth = $dbh->prepare($findquery);
+         $fparameters = [$lat, $long];
+         if ($fsth->execute($fparameters) === TRUE) {
+            $alreadyListed = $fsth->rowCount();
+            if ($alreadyListed)
+               echo "I'm sorry, there is already an entry for that address.<BR>";
+         }
+      }      
       $sql = <<<EOD
 INSERT INTO facilities 
    (submitted_by, submitter_type, name, address, city, province_state, country, postal, email, phone, website, approval_status, diesel, washroom, shower, reststop, coffee, snacks, meal, drivethrough, walkthrough, otherservices, lat, lng) 
@@ -182,9 +245,27 @@ VALUES
    (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 EOD;
 
-      if (!$alreadyListed)
-      {
-         $sth = $dbh->prepare($sql);
+      if ($entryid){
+         $active = 1;
+         $msg = "Updated $bizname - Add another location";
+         if ($delete)
+         {
+            $active = 0;
+            $msg = "Deleted $bizname - Add another location";
+         }
+         // if entryid is non-zero, then this is an update to an existing entry, so modify the query
+         $sql = <<<EOD
+UPDATE facilities set submitted_by=?, submitter_type=?, name=?, address=?, city=?, province_state=?, country=?, postal=?, email=?, phone=?, website=?, approval_status=?, active=?, diesel=?, washroom=?, shower=?, reststop=?, coffee=?, snacks=?, meal=?, drivethrough=?, walkthrough=?, otherservices=?, lat=?, lng=? WHERE id=?
+EOD;
+         $parameters = [
+            $submitter_name, $submitter_type,
+            $bizname, $street, $city, $province, $country, $postal,
+            $bemail, $phone, $website,
+            $approval_status, $active,
+            $diesel, $washroom, $shower, $parking, $coffee, $snacks, $meal, $drivethrough, $walkup, $other,
+            $lat, $long, $entryid
+         ];
+      }else{
          $parameters = [
             $submitter_name, $submitter_type,
             $bizname, $street, $city, $province, $country, $postal,
@@ -193,9 +274,13 @@ EOD;
             $diesel, $washroom, $shower, $parking, $coffee, $snacks, $meal, $drivethrough, $walkup, $other,
             $lat, $long
          ];
+         $msg = "Added $bizname - Add another location";
+      }
+      if (!$alreadyListed)
+      {
+         $sth = $dbh->prepare($sql);
 
          if ($sth->execute($parameters) === TRUE) {
-            $msg = "Added $bizname - Add another location";
             $msg2 = "";
             
             // Clear the variables used to persist form field values in the event of an error
@@ -230,16 +315,20 @@ EOD;
             $cdrivethrough = "";
             $cwalkup = "";
             $cdiesel = "";
+            
+            $other = "";
          } else {
             $msg = "Error adding location<BR>";
             $msg2 = print_r($sth->errorInfo(), true)."<br/>$sql<br/>".print_r($parameters, true);
          }
       }
    }
-
-   $dbh = null;
 }
+$dbh = null;
 
+function sanitize($in) {
+    return htmlentities(trim($in), ENT_QUOTES);
+}
 ?>
 <html>
 <head>
@@ -277,6 +366,9 @@ EOD;
    <input type="text" class="form-control" id="bemail" name="bemail" placeholder="Business email address (blank if unknown)" <?php echo "value=\"$bemail\""?>>
    <input type="text" class="form-control" id="phone" name="phone" placeholder="Phone (e.g. 613-394-2000)" <?php echo "value=\"$phone\""?>>
    <input type="text" class="form-control" id="website" name="website" placeholder="Website (e.g. www.timhortons.ca)" <?php echo "value=\"$website\""?>>
+   <?php if ($entryid){?>
+   <input type=hidden id="entryid" name="entryid" value=<?php echo $entryid;?> >
+   <?php }?>
    <div id="modpindiv" style="display: none;"><input type="text" class="form-control" id="modpin" name="modpin" placeholder="Moderator PIN" <?php echo "value=\"$modpin\""?>></div>
 </div>
 <B>Services available at this location</B>
@@ -311,6 +403,11 @@ EOD;
    <input type="text" class="form-control" id="other" name="other" placeholder="Other (e.g. Lounge,TV)" <?php echo "value=\"$other\""?>>
 </div>
 <BR>
+<?php if ($entryid){?>
+   <div class="checkbox">
+    <label><input type="checkbox" id="delete" name="delete" > Delete this entire entry</label>
+   </div>
+<?php }?>
 <button type="submit" class="btn btn-primary">Submit</button>
 
 <script>

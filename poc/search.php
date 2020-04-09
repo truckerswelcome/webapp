@@ -66,7 +66,7 @@ while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
     if ($row["meal"] == 1) $services[] = "Meals";
     if ($row["drivethrough"] == 1) $services[] = "Drive-through";
     if ($row["walkthrough"] == 1) $services[] = "Walk-through";
-    if ($row["otherservices"] == 1) $services[] = $other;
+    if (!empty($row["otherservices"])) $services[] = $row["otherservices"];
 
     $data['results'][] = [
         'id'             => sanitize($row['id']),

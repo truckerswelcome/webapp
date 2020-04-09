@@ -110,7 +110,7 @@ function createMarker(result) {
     let mapsurl = `https://maps.google.com/maps?q=${result.address},${result.city},${result.province_state},${result.postal}`;
     let name = result.website.length > 0 ? `<a href=${result.website}>${result.name}</a>` : result.name;
 
-    let content = `<div id="content"><B>${name}</B><br/>${result.address},${result.city},${result.province_state},${result.postal}<br/>Phone: <a href="tel:${result.phone}">${result.phone}</a><br/><B>Services:</B>${result.services_list}<br/><a href="${mapsurl}">Open in Google Maps</a></div>`;
+    let content = `<div id="content"><form action="addsite.php" method="post"><B>${name}</B>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input type="hidden" name="entryid" value="${result.id}"><button type="submit" name="(Edit)" value="(Edit)" class="btn-link">(Edit)</button></form><br/>${result.address},${result.city},${result.province_state},${result.postal}<br/>Phone: <a href="tel:${result.phone}">${result.phone}</a><br/><B>Services:</B>${result.services_list}<br/><a href="${mapsurl}">Open in Google Maps</a></div>`;
 
     let marker = new google.maps.Marker({
         map: map,
