@@ -88,7 +88,7 @@ function doSearch(coordinates) {
             let x = 1;
         }
     };
-    xhr.open('POST', '/search.php', true);
+    xhr.open('POST', 'search.php', true);
     xhr.send(new FormData(form));
     return false;
 }

@@ -22,7 +22,7 @@ if (array_key_exists('bizname', $_POST)){
    $meal = 0;
    $drivethrough = 0;
    $walkup = 0;
-   $approved=0;
+   $approval_status="pending";
    $form_errors = array();
    
    // Extract form data safely
@@ -106,7 +106,7 @@ if (array_key_exists('bizname', $_POST)){
       if (false === array_search($modpin, $modpins)){
          $form_errors['Moderator PIN'] = 'Invalid';
       }else{
-         $approved = 1;
+         $approval_status="approved";
       }
    }
 
@@ -177,7 +177,7 @@ EOD;
       
       $sql = <<<EOD
 INSERT INTO facilities 
-   (submitted_by, submitter_type, name, address, city, province_state, country, postal, email, phone, website, approved, diesel, washroom, shower, reststop, coffee, snacks, meal, drivethrough, walkthrough, otherservices, lat, lng) 
+   (submitted_by, submitter_type, name, address, city, province_state, country, postal, email, phone, website, approval_status, diesel, washroom, shower, reststop, coffee, snacks, meal, drivethrough, walkthrough, otherservices, lat, lng) 
 VALUES
    (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 EOD;
@@ -189,7 +189,7 @@ EOD;
             $submitter_name, $submitter_type,
             $bizname, $street, $city, $province, $country, $postal,
             $bemail, $phone, $website,
-            $approved,
+            $approval_status,
             $diesel, $washroom, $shower, $parking, $coffee, $snacks, $meal, $drivethrough, $walkup, $other,
             $lat, $long
          ];

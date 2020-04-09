@@ -46,7 +46,7 @@ $data = [
 
 $query = <<<EOT
 SELECT *, (3959 * acos(cos(radians(?)) * cos(radians(lat)) * cos(radians(lng) - radians(?)) + sin(radians(?)) * sin(radians(lat)))) AS distance 
-    FROM `facilities` WHERE approved = 1 HAVING distance < ? 
+    FROM `facilities` WHERE approval_status='approved' AND active=1 HAVING distance < ? 
     ORDER BY distance LIMIT 0 , 50;
 EOT;
 $stmt = $dbh->prepare($query);
