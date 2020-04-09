@@ -6,7 +6,10 @@ var locationSelect;
 var latLng;
 let doGeolocationSearch = true;
 const searchForm = document.querySelector('#search form');
-
+const navIcon = document.querySelector('.nav-icon');
+const navCloseIcon = document.querySelector('.nav-close-icon');
+const sidenav = document.querySelector('.sidenav');
+const overlay = document.querySelector('.overlay');
 
 const toronto = {
     lat: 43.6532,
@@ -25,7 +28,9 @@ function initMap() {
         zoom: 9,
         mapTypeId: 'roadmap',
         mapTypeControl: false,
-        mapTypeControlOptions: { style: google.maps.MapTypeControlStyle.DROPDOWN_MENU }
+        mapTypeControlOptions: { style: google.maps.MapTypeControlStyle.DROPDOWN_MENU },
+        streetViewControl: false,
+        fullscreenControl: false
     });
     infoWindow = new google.maps.InfoWindow();
 
@@ -122,4 +127,17 @@ function createMarker(result) {
 
 function createResult(result, num) {
     // maybe this is used to create a list of results for an alternate view
+}
+
+overlay.addEventListener('click', closeSidenav);
+navCloseIcon.addEventListener('click', closeSidenav);
+
+navIcon.addEventListener('click', function () {
+    sidenav.classList.add('sidenav-open');
+    overlay.classList.add('overlay-open');
+});
+
+function closeSidenav() {
+    sidenav.classList.remove('sidenav-open');
+    overlay.classList.remove('overlay-open');
 }
