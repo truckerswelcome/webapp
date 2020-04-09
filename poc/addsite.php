@@ -79,7 +79,7 @@ if (array_key_exists('bizname', $_POST)){
    if (strlen($submitter_type) > 20) $form_errors['Who are you'] = 'Invalid';
    if (strlen($bizname) > 160) $form_errors['Business Name'] = 'Invalid';
    if (strlen($street) > 180) $form_errors['Street Address'] = 'Invalid';
-   if (strlen($city) > 20) $form_errors['City'] = 'Invalid';
+   if (strlen($city) > 50) $form_errors['City'] = 'Invalid';
    if (strlen($province) > 20) $form_errors['Province'] = 'Invalid';
    if (strlen($country) > 20) $form_errors['Country'] = 'Invalid';
    if (strlen($postal) > 7) $form_errors['Postal Code'] = 'Invalid';
