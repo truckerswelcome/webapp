@@ -2,17 +2,21 @@
 
 require_once '/var/opt/webapp/nogit/creds.php';
 
+function sanitize($in) {
+    return htmlentities(trim($in), ENT_QUOTES);
+}
+
 function geocode($location) {
     global $geokey;
     $toronto = [43.6532, -79.3832];
-    
     $location = str_replace(" ","+",$location);
     
+    // Make a call to the Google Geocode API, to convert location to latitude/longitude
     $gpsurl = "https://maps.googleapis.com/maps/api/geocode/json?address=$location&key=$geokey";
     $gpsres = file_get_contents($gpsurl);
-    if (!empty($gpsres)){
+    if (!empty($gpsres)) {
         $gpsvar = json_decode($gpsres);
-        if ($gpsvar->status=='OK'){
+        if ($gpsvar->status == 'OK') {
             $lat = isset($gpsvar->results[0]->geometry->location->lat) ? $gpsvar->results[0]->geometry->location->lat : 0;
             $long = isset($gpsvar->results[0]->geometry->location->lng) ? $gpsvar->results[0]->geometry->location->lng : 0;
             return [$lat, $long];
@@ -53,33 +57,32 @@ $stmt = $dbh->prepare($query);
 $result = $stmt->execute([$latitude, $longitude, $latitude, $radius]);
 while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
     $services = [];
-    if ($row["diesel"] == 1) array_push($services, "Diesel");
-    if ($row["washroom"] == 1) array_push($services, "Washroom");
-    if ($row["shower"] == 1) array_push($services, "Shower");
-    if ($row["reststop"] == 1) array_push($services, "Parking");
-    if ($row["coffee"] == 1) array_push($services, "Coffee");
-    if ($row["snacks"] == 1) array_push($services, "Snacks");
-    if ($row["meal"] == 1) array_push($services, "Meals");
-    if ($row["drivethrough"] == 1) array_push($services, "Drive-through");
-    if ($row["walkthrough"] == 1) array_push($services, "Walk-through");
-    if ($row["otherservices"] == 1) array_push($services, "$other");
-    $services_list = implode(', ', $services);
+    if ($row["diesel"] == 1) $services[] = "Diesel";
+    if ($row["washroom"] == 1) $services[] = "Washroom";
+    if ($row["shower"] == 1) $services[] = "Shower";
+    if ($row["reststop"] == 1) $services[] = "Parking";
+    if ($row["coffee"] == 1) $services[] = "Coffee";
+    if ($row["snacks"] == 1) $services[] = "Snacks";
+    if ($row["meal"] == 1) $services[] = "Meals";
+    if ($row["drivethrough"] == 1) $services[] = "Drive-through";
+    if ($row["walkthrough"] == 1) $services[] = "Walk-through";
+    if ($row["otherservices"] == 1) $services[] = $other;
 
     $data['results'][] = [
-        'id' => $row['id'],
-        'name' => $row['name'],
-        'address' => $row['address'],
-        'city' => $row['city'],
-        'province_state' => $row['province_state'],
-        'country' => $row['country'],
-        'postal' => $row['postal'],
-        'phone' => $row['phone'],
-        'email' => $row['email'],
-        'website' => $row['website'],
-        'lat' => $row['lat'],
-        'lng' => $row['lng'],
-        'services_list' => $services_list,
-        'distance' => sprintf("%0.1f", $row['distance'])
+        'id'             => sanitize($row['id']),
+        'name'           => sanitize($row['name']),
+        'address'        => sanitize($row['address']),
+        'city'           => sanitize($row['city']),
+        'province_state' => sanitize($row['province_state']),
+        'country'        => sanitize($row['country']),
+        'postal'         => sanitize($row['postal']),
+        'phone'          => sanitize($row['phone']),
+        'email'          => sanitize($row['email']),
+        'website'        => sanitize($row['website']),
+        'lat'            => sanitize($row['lat']),
+        'lng'            => sanitize($row['lng']),
+        'services_list'  => implode(', ', $services),
+        'distance'       => sprintf("%0.1f", $row['distance'])
     ];
 }
 
