@@ -19,7 +19,6 @@ const hiddenLongitudeInput = searchForm.querySelector('input[name=lng]');
 const hiddenOptionsInput = searchForm.querySelector('input[name=options]');
 const startForm = document.querySelector('#start-form');
 const startLocation = startForm ? startForm.elements['start-location'] : false;
-const useMyLocation = startForm ? startForm.elements['use-my-location'] : false;
 const searchThisArea = document.querySelector('#search-this-area');
 const searchThisAreaButton = searchThisArea.querySelector('#search-this-area > button');
 
@@ -57,14 +56,11 @@ function initMap() {
         return false;
     };
 
-    geolocate();
-}
-
-function geolocate() {
     // try to geolocate on the browser
     if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(
             function (position) {
+                // success
                 if (doGeolocationSearch) {
                     let coordinates = {
                         lat: position.coords.latitude,
@@ -73,15 +69,16 @@ function geolocate() {
                     // set the hidden lat/lng inputs to the given coordinates
                     hiddenLatitudeInput.value = coordinates.lat;
                     hiddenLongitudeInput.value = coordinates.lng;
+                    hiddenOptionsInput.value = 'all';
                     map.setCenter(coordinates);
-                    useMyLocation.checked = true;
-                    startLocation.disabled = true;
+                    doSearch();
                 }
             },
             function (err) {
-                // geolocate failure
+                // failure
                 map.setCenter(toronto);
                 console.warn(`Geolocate Error(${err.code}): ${err.message}`);
+                $('#start-modal').modal('show');
             },
             {
                 enableHighAccuracy: true,
@@ -156,12 +153,6 @@ function closeSidenav() {
     overlay.classList.remove('overlay-open');
 }
 
-if (useMyLocation) {
-    useMyLocation.addEventListener('click', () => {
-        startLocation.disabled = useMyLocation.checked;
-    });
-}
-
 searchThisAreaButton.addEventListener('click', () => {
     // get new map center
     let center = map.getCenter();
@@ -171,7 +162,6 @@ searchThisAreaButton.addEventListener('click', () => {
     doSearch();
 });
 
-$('#start-modal').modal('show');
 document.querySelector('#search-button').addEventListener('click', () => {
     if (startForm === null)
         return;
@@ -193,15 +183,12 @@ document.querySelector('#search-button').addEventListener('click', () => {
     }
     hiddenOptionsInput.value = tmp.join(',');
 
-    if (useMyLocation.checked && hiddenLatitudeInput.value.length > 0 && hiddenLongitudeInput.value.length > 0) {
-        doSearch();
-    } else {
-        if (startLocation.value.length == 0) {
-            alert('Please enter your location, or check the use my location box');
-            return false;
-        }
-        searchLocation.value = startLocation.value;
-        doSearch();
+    if (startLocation.value.length == 0) {
+        alert('Please enter your location, or check the use my location box');
+        return false;
     }
+    searchLocation.value = startLocation.value;
+    doSearch();
+
     $('#start-modal').modal('hide');
 });
