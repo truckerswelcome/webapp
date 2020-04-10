@@ -32,10 +32,12 @@
             <input class="form-control" type="text" name="location" placeholder="Search TruckersWelcome"/>
             <input type="hidden" name="lat"/>
             <input type="hidden" name="lng"/>
+            <input type="hidden" name="options"/>
          </form>
       </div>
       <div id="map"></div>
    </main>
+   <?php require_once 'html/start.html';?>
    <script src="js/tw.js"></script>
    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDpsl9O2zNsly1ygES951ava6Ckdtk5Wos&callback=initMap" async defer></script>
 </body>

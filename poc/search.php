@@ -33,6 +33,23 @@ if (strlen($location) > 0) {
     $latitude = filter_input(INPUT_POST, 'lat', FILTER_SANITIZE_NUMBER_FLOAT, FILTER_FLAG_ALLOW_FRACTION);
     $longitude = filter_input(INPUT_POST, 'lng', FILTER_SANITIZE_NUMBER_FLOAT, FILTER_FLAG_ALLOW_FRACTION);
 }
+
+// convert the incoming search options to part of the where clause
+$options = filter_input(INPUT_POST, 'options', FILTER_SANITIZE_STRING);
+$tmp = [];
+foreach (explode(',', $options) as $opt) {
+    switch ($opt) {
+        case 'washroom': $tmp[] = "washroom=1"; break;
+        case 'shower': $tmp[] = "shower=1"; break;
+        case 'reststop': $tmp[] = "reststop=1"; break;
+        case 'coffee': $tmp[] = "coffee=1"; break;
+        case 'snacks': $tmp[] = "snacks=1"; break;
+        case 'meal': $tmp[] = "meal=1"; break;
+        case 'drivethrough': $tmp[] = "drivethrough=1"; break;
+        case 'walkthrough': $tmp[] = "walkthrough=1"; break;
+    }
+}
+
 $radius = filter_input(INPUT_POST, 'radius', FILTER_SANITIZE_NUMBER_INT);
 $radius = $radius == NULL ? 100 : $radius;
 
@@ -47,43 +64,46 @@ $data = [
     'lng' => (float) $longitude,
     'results' => []
 ];
+if (count($tmp) > 0) {
+    $whereOptions = ' AND (' . implode(' OR ', $tmp) . ')';
 
-$query = <<<EOT
-SELECT *, (3959 * acos(cos(radians(?)) * cos(radians(lat)) * cos(radians(lng) - radians(?)) + sin(radians(?)) * sin(radians(lat)))) AS distance 
-    FROM `facilities` WHERE approval_status='approved' AND active=1 HAVING distance < ? 
-    ORDER BY distance LIMIT 0 , 50;
-EOT;
-$stmt = $dbh->prepare($query);
-$result = $stmt->execute([$latitude, $longitude, $latitude, $radius]);
-while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-    $services = [];
-    if ($row["diesel"] == 1) $services[] = "Diesel";
-    if ($row["washroom"] == 1) $services[] = "Washroom";
-    if ($row["shower"] == 1) $services[] = "Shower";
-    if ($row["reststop"] == 1) $services[] = "Parking";
-    if ($row["coffee"] == 1) $services[] = "Coffee";
-    if ($row["snacks"] == 1) $services[] = "Snacks";
-    if ($row["meal"] == 1) $services[] = "Meals";
-    if ($row["drivethrough"] == 1) $services[] = "Drive-through";
-    if ($row["walkthrough"] == 1) $services[] = "Walk-through";
-    if (!empty($row["otherservices"])) $services[] = $row["otherservices"];
+    $query = <<<EOT
+    SELECT *, (3959 * acos(cos(radians(?)) * cos(radians(lat)) * cos(radians(lng) - radians(?)) + sin(radians(?)) * sin(radians(lat)))) AS distance 
+        FROM `facilities` WHERE approval_status='approved' AND active=1 $whereOptions HAVING distance < ? 
+        ORDER BY distance LIMIT 0 , 50;
+    EOT;
+    $stmt = $dbh->prepare($query);
+    $result = $stmt->execute([$latitude, $longitude, $latitude, $radius]);
+    while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+        $services = [];
+        if ($row["diesel"] == 1) $services[] = "Diesel";
+        if ($row["washroom"] == 1) $services[] = "Washroom";
+        if ($row["shower"] == 1) $services[] = "Shower";
+        if ($row["reststop"] == 1) $services[] = "Parking";
+        if ($row["coffee"] == 1) $services[] = "Coffee";
+        if ($row["snacks"] == 1) $services[] = "Snacks";
+        if ($row["meal"] == 1) $services[] = "Meals";
+        if ($row["drivethrough"] == 1) $services[] = "Drive-through";
+        if ($row["walkthrough"] == 1) $services[] = "Walk-through";
+        if (!empty($row["otherservices"])) $services[] = $row["otherservices"];
 
-    $data['results'][] = [
-        'id'             => sanitize($row['id']),
-        'name'           => sanitize($row['name']),
-        'address'        => sanitize($row['address']),
-        'city'           => sanitize($row['city']),
-        'province_state' => sanitize($row['province_state']),
-        'country'        => sanitize($row['country']),
-        'postal'         => sanitize($row['postal']),
-        'phone'          => sanitize($row['phone']),
-        'email'          => sanitize($row['email']),
-        'website'        => sanitize($row['website']),
-        'lat'            => sanitize($row['lat']),
-        'lng'            => sanitize($row['lng']),
-        'services_list'  => implode(', ', $services),
-        'distance'       => sprintf("%0.1f", $row['distance'])
-    ];
+        $data['results'][] = [
+            'id'             => sanitize($row['id']),
+            'name'           => sanitize($row['name']),
+            'address'        => sanitize($row['address']),
+            'city'           => sanitize($row['city']),
+            'province_state' => sanitize($row['province_state']),
+            'country'        => sanitize($row['country']),
+            'postal'         => sanitize($row['postal']),
+            'phone'          => sanitize($row['phone']),
+            'email'          => sanitize($row['email']),
+            'website'        => sanitize($row['website']),
+            'lat'            => sanitize($row['lat']),
+            'lng'            => sanitize($row['lng']),
+            'services_list'  => implode(', ', $services),
+            'distance'       => sprintf("%0.1f", $row['distance'])
+        ];
+    }
 }
 
 echo json_encode($data);

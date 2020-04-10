@@ -5,11 +5,21 @@ var infoWindow;
 var locationSelect;
 var latLng;
 let doGeolocationSearch = true;
+let coordinates = false;
+let queryOptions = false;
+
 const searchForm = document.querySelector('#search form');
 const navIcon = document.querySelector('.nav-icon');
 const navCloseIcon = document.querySelector('.nav-close-icon');
 const sidenav = document.querySelector('.sidenav');
 const overlay = document.querySelector('.overlay');
+const searchLocation = searchForm.querySelector('input[name=location]');
+const hiddenLatitudeInput = searchForm.querySelector('input[name=lat]');
+const hiddenLongitudeInput = searchForm.querySelector('input[name=lng]');
+const hiddenOptionsInput = searchForm.querySelector('input[name=options]');
+const startForm = document.querySelector('#start-form');
+const startLocation = startForm ? startForm.elements['start-location'] : false;
+const useMyLocation = startForm ? startForm.elements['use-my-location'] : false;
 
 const toronto = {
     lat: 43.6532,
@@ -35,24 +45,38 @@ function initMap() {
     infoWindow = new google.maps.InfoWindow();
 
     searchForm.onsubmit = function () {
-        doSearch();
+        if (searchLocation.value.length > 0) {
+            hiddenLatitudeInput.value = '';
+            hiddenLongitudeInput.value = '';
+            doSearch();
+        } else {
+            alert('Please enter a location');
+        }
         return false;
     };
 
+    geolocate();
+}
+
+function geolocate() {
+    // try to geolocate on the browser
     if (navigator.geolocation) {
-        // try to geolocate and load search results
         navigator.geolocation.getCurrentPosition(
             function (position) {
                 if (doGeolocationSearch) {
-                    doSearch({
+                    let coordinates = {
                         lat: position.coords.latitude,
                         lng: position.coords.longitude
-                    }, true);
+                    };
+                    // set the hidden lat/lng inputs to the given coordinates
+                    hiddenLatitudeInput.value = coordinates.lat;
+                    hiddenLongitudeInput.value = coordinates.lng;
+                    map.setCenter(coordinates);
                 }
             },
             function (err) {
                 // geolocate failure
-                doSearch(toronto);
+                map.setCenter(toronto);
                 console.warn(`Geolocate Error(${err.code}): ${err.message}`);
             },
             {
@@ -64,20 +88,9 @@ function initMap() {
     }
 }
 
-function doSearch(coordinates) {
+function doSearch() {
     let form = document.querySelector('#search form');
-    const searchLocation = form.querySelector('input[name=location]').value;
-    if (searchLocation.length > 0) {
-        form.querySelector('input[name=lat]').value = '';
-        form.querySelector('input[name=lng]').value = '';
-    } else {
-        form.querySelector('input[name=lat]').value = coordinates.lat;
-        form.querySelector('input[name=lng]').value = coordinates.lng;
-        map.setCenter(coordinates);
-    }
-
     infoWindow.close();
-
     let xhr = new XMLHttpRequest();
     xhr.onreadystatechange = function () {
         if (xhr.readyState == 4) {
@@ -104,9 +117,6 @@ function createMarker(result) {
     let latlng = new google.maps.LatLng(lat, lng);
 
     // create a marker for each result
-    //let pageUrl = `/${page.tag}/${page.id}/${page.name}`;
-    //let phone = page.phone;
-    //let formattedPhone = formatPhoneNumber(phone);
     let mapsurl = `https://maps.google.com/maps?q=${result.address},${result.city},${result.province_state},${result.postal}`;
     let name = result.website.length > 0 ? `<a href=${result.website}>${result.name}</a>` : result.name;
 
@@ -141,3 +151,45 @@ function closeSidenav() {
     sidenav.classList.remove('sidenav-open');
     overlay.classList.remove('overlay-open');
 }
+
+if (useMyLocation) {
+    useMyLocation.addEventListener('click', () => {
+        startLocation.disabled = useMyLocation.checked;
+        startLocation.placeholder = startLocation.disabled ? '' : 'Enter a location to search';
+    });
+}
+
+$('#start-modal').modal('show');
+document.querySelector('#search-button').addEventListener('click', () => {
+    if (startForm === null)
+        return;
+
+    const options = {
+        washroom: startForm.elements.washroom.checked,
+        shower: startForm.elements.shower.checked,
+        reststop: startForm.elements.reststop.checked,
+        coffee: startForm.elements.coffee.checked,
+        snacks: startForm.elements.snacks.checked,
+        meal: startForm.elements.meal.checked,
+        drivethrough: startForm.elements.drivethrough.checked,
+        walkthrough: startForm.elements.walkthrough.checked
+    }
+    let tmp = [];
+    for (let i in options) {
+        if (options[i])
+            tmp.push(i);
+    }
+    hiddenOptionsInput.value = tmp.join(',');
+
+    if (useMyLocation.checked && hiddenLatitudeInput.value.length > 0 && hiddenLongitudeInput.value.length > 0) {
+        doSearch();
+    } else {
+        if (startLocation.value.length == 0) {
+            alert('Please enter your location, or check the use my location box');
+            return false;
+        }
+        searchLocation.value = startLocation.value;
+        doSearch();
+    }
+    $('#start-modal').modal('hide');
+});
