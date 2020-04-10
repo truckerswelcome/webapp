@@ -130,7 +130,7 @@ if (array_key_exists('bizname', $_POST)){
 
    $delete  = filter_input(INPUT_POST, 'delete') == 'on' ? 1 : 0;
   
-   if (!$washroom && !$shower && !$parking && !$coffee && !$snacks && !$meal && !$drivethrough && !$walkup){
+   if (!$washroom && !$shower && !$parking && !$coffee && !$snacks && !$meal && !$drivethrough && !$walkup && !$diesel){
       $form_errors['Services'] = 'You must offer at least one of the services';
    }
 
@@ -176,8 +176,11 @@ if (array_key_exists('bizname', $_POST)){
    $postal = str_replace("-","",$postal);
 
    if (0 == sizeof($form_errors)){
-      $valid_number = filter_var($phone,FILTER_SANITIZE_NUMBER_INT);
-      if (empty($valid_number)) $form_errors['Phone'] = 'Invalid';
+      $valid_number = "";
+      if (!empty($phone)){
+         $valid_number = filter_var($phone,FILTER_SANITIZE_NUMBER_INT);
+         if (empty($valid_number)) $form_errors['Phone'] = 'Invalid';
+      }
       if (!empty($bemail))
          if (!filter_var($bemail, FILTER_VALIDATE_EMAIL)) $form_errors['Email'] = 'Invalid';
       if (0 == strcasecmp($country, "canada"))
@@ -364,7 +367,7 @@ function sanitize($in) {
    <input type="text" class="form-control" id="country" name="country" placeholder="Country (e.g. Canada)" <?php echo "value=\"$country\""?>>
    <input type="text" class="form-control" id="postal" name="postal" placeholder="Postal Code (e.g. K8V 5P8)" <?php echo "value=\"$postal\""?>>
    <input type="text" class="form-control" id="bemail" name="bemail" placeholder="Business email address (blank if unknown)" <?php echo "value=\"$bemail\""?>>
-   <input type="text" class="form-control" id="phone" name="phone" placeholder="Phone (e.g. 613-394-2000)" <?php echo "value=\"$phone\""?>>
+   <input type="text" class="form-control" id="phone" name="phone" placeholder="Phone (e.g. 613-555-2000)" <?php echo "value=\"$phone\""?>>
    <input type="text" class="form-control" id="website" name="website" placeholder="Website (e.g. www.timhortons.ca)" <?php echo "value=\"$website\""?>>
    <?php if ($entryid){?>
    <input type=hidden id="entryid" name="entryid" value=<?php echo $entryid;?> >
