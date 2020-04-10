@@ -21,6 +21,7 @@
          <li><a href="help.html">Help</a></li>
          <li><a href="about.html">About</a></li>
          <li><a href="mailto:help@truckerswelcome.ca?subject=Mail from TruckersWelcome">Email Us</a></li>
+         <li><a href="tos.html">Terms of Service</a></li>
       </ul>
    </aside>
    <div class="overlay"></div>
