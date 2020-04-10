@@ -78,6 +78,7 @@ function initMap() {
                 // failure
                 map.setCenter(toronto);
                 console.warn(`Geolocate Error(${err.code}): ${err.message}`);
+                hiddenOptionsInput.value = 'all';
                 $('#start-modal').modal('show');
             },
             {
@@ -162,29 +163,43 @@ searchThisAreaButton.addEventListener('click', () => {
     doSearch();
 });
 
+if (startLocation) {
+    startLocation.addEventListener('keyup', (e) => {
+        if (e.keyCode === 13) {
+            if (startLocation.value.length == 0) {
+                alert('Please enter your location');
+                return false;
+            }
+            searchLocation.value = startLocation.value;
+            doSearch();
+            $('#start-modal').modal('hide');
+        }
+    })
+}
+
 document.querySelector('#search-button').addEventListener('click', () => {
     if (startForm === null)
         return;
-
-    const options = {
-        washroom: startForm.elements.washroom.checked,
-        shower: startForm.elements.shower.checked,
-        reststop: startForm.elements.reststop.checked,
-        coffee: startForm.elements.coffee.checked,
-        snacks: startForm.elements.snacks.checked,
-        meal: startForm.elements.meal.checked,
-        drivethrough: startForm.elements.drivethrough.checked,
-        walkthrough: startForm.elements.walkthrough.checked
-    }
-    let tmp = [];
-    for (let i in options) {
-        if (options[i])
-            tmp.push(i);
-    }
-    hiddenOptionsInput.value = tmp.join(',');
-
+    /*
+        const options = {
+            washroom: startForm.elements.washroom.checked,
+            shower: startForm.elements.shower.checked,
+            reststop: startForm.elements.reststop.checked,
+            coffee: startForm.elements.coffee.checked,
+            snacks: startForm.elements.snacks.checked,
+            meal: startForm.elements.meal.checked,
+            drivethrough: startForm.elements.drivethrough.checked,
+            walkthrough: startForm.elements.walkthrough.checked
+        }
+        let tmp = [];
+        for (let i in options) {
+            if (options[i])
+                tmp.push(i);
+        }
+        hiddenOptionsInput.value = tmp.join(',');
+    */
     if (startLocation.value.length == 0) {
-        alert('Please enter your location, or check the use my location box');
+        alert('Please enter your location');
         return false;
     }
     searchLocation.value = startLocation.value;
