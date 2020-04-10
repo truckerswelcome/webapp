@@ -43,6 +43,12 @@ function initMap() {
         streetViewControl: false,
         fullscreenControl: false
     });
+    map.addListener('center_changed', () => {
+        if (document.activeElement == searchLocation) {
+            searchLocation.blur();
+        }
+    });
+
     infoWindow = new google.maps.InfoWindow();
 
     searchForm.onsubmit = function () {
@@ -91,6 +97,7 @@ function initMap() {
 }
 
 function doSearch() {
+    searchLocation.blur();
     let form = document.querySelector('#search form');
     infoWindow.close();
     let xhr = new XMLHttpRequest();
