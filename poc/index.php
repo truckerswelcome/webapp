@@ -30,7 +30,7 @@
             <div></div>
          </div>
          <form>
-            <input class="form-control" type="text" name="location" placeholder="Search TruckersWelcome"/>
+            <input class="form-control" type="text" name="location" placeholder="Search TruckersWelcome" autocomplete="off"/>
             <input type="hidden" name="lat"/>
             <input type="hidden" name="lng"/>
             <input type="hidden" name="options"/>
