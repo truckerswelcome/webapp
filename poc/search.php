@@ -36,17 +36,22 @@ if (strlen($location) > 0) {
 
 // convert the incoming search options to part of the where clause
 $options = filter_input(INPUT_POST, 'options', FILTER_SANITIZE_STRING);
-$tmp = [];
-foreach (explode(',', $options) as $opt) {
-    switch ($opt) {
-        case 'washroom': $tmp[] = "washroom=1"; break;
-        case 'shower': $tmp[] = "shower=1"; break;
-        case 'reststop': $tmp[] = "reststop=1"; break;
-        case 'coffee': $tmp[] = "coffee=1"; break;
-        case 'snacks': $tmp[] = "snacks=1"; break;
-        case 'meal': $tmp[] = "meal=1"; break;
-        case 'drivethrough': $tmp[] = "drivethrough=1"; break;
-        case 'walkthrough': $tmp[] = "walkthrough=1"; break;
+$optionList = [];
+$useAllOptions = false;
+if ($options === 'all') {
+    $useAllOptions = true; 
+} else {
+    foreach (explode(',', $options) as $opt) {
+        switch ($opt) {
+            case 'washroom': $optionList[] = "washroom=1"; break;
+            case 'shower': $optionList[] = "shower=1"; break;
+            case 'reststop': $optionList[] = "reststop=1"; break;
+            case 'coffee': $optionList[] = "coffee=1"; break;
+            case 'snacks': $optionList[] = "snacks=1"; break;
+            case 'meal': $optionList[] = "meal=1"; break;
+            case 'drivethrough': $optionList[] = "drivethrough=1"; break;
+            case 'walkthrough': $optionList[] = "walkthrough=1"; break;
+        }
     }
 }
 
@@ -64,8 +69,11 @@ $data = [
     'lng' => (float) $longitude,
     'results' => []
 ];
-if (count($tmp) > 0) {
-    $whereOptions = ' AND (' . implode(' OR ', $tmp) . ')';
+
+$optionCount = count($optionList);
+
+if ($useAllOptions || $optionCount > 0) {
+    $whereOptions = ($optionCount > 0) ? ' AND (' . implode(' OR ', $optionList) . ')' : '';
 
     $query = <<<EOT
     SELECT *, (3959 * acos(cos(radians(?)) * cos(radians(lat)) * cos(radians(lng) - radians(?)) + sin(radians(?)) * sin(radians(lat)))) AS distance 

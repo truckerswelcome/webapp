@@ -37,6 +37,9 @@
             <input type="hidden" name="options"/>
          </form>
       </div>
+      <div id="search-this-area">
+         <button type="button" class="btn btn-light btn-sm">Search this area</button>
+      </div>
       <div id="map"></div>
    </main>
    <?php require_once 'html/start.html';?>

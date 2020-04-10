@@ -19,7 +19,8 @@ const hiddenLongitudeInput = searchForm.querySelector('input[name=lng]');
 const hiddenOptionsInput = searchForm.querySelector('input[name=options]');
 const startForm = document.querySelector('#start-form');
 const startLocation = startForm ? startForm.elements['start-location'] : false;
-const useMyLocation = startForm ? startForm.elements['use-my-location'] : false;
+const searchThisArea = document.querySelector('#search-this-area');
+const searchThisAreaButton = searchThisArea.querySelector('#search-this-area > button');
 
 const toronto = {
     lat: 43.6532,
@@ -55,14 +56,11 @@ function initMap() {
         return false;
     };
 
-    geolocate();
-}
-
-function geolocate() {
     // try to geolocate on the browser
     if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(
             function (position) {
+                // success
                 if (doGeolocationSearch) {
                     let coordinates = {
                         lat: position.coords.latitude,
@@ -71,13 +69,17 @@ function geolocate() {
                     // set the hidden lat/lng inputs to the given coordinates
                     hiddenLatitudeInput.value = coordinates.lat;
                     hiddenLongitudeInput.value = coordinates.lng;
+                    hiddenOptionsInput.value = 'all';
                     map.setCenter(coordinates);
+                    doSearch();
                 }
             },
             function (err) {
-                // geolocate failure
+                // failure
                 map.setCenter(toronto);
                 console.warn(`Geolocate Error(${err.code}): ${err.message}`);
+                hiddenOptionsInput.value = 'all';
+                $('#start-modal').modal('show');
             },
             {
                 enableHighAccuracy: true,
@@ -152,44 +154,56 @@ function closeSidenav() {
     overlay.classList.remove('overlay-open');
 }
 
-if (useMyLocation) {
-    useMyLocation.addEventListener('click', () => {
-        startLocation.disabled = useMyLocation.checked;
-        startLocation.placeholder = startLocation.disabled ? '' : 'Enter a location to search';
-    });
+searchThisAreaButton.addEventListener('click', () => {
+    // get new map center
+    let center = map.getCenter();
+    searchLocation.value = '';
+    hiddenLatitudeInput.value = center.lat();
+    hiddenLongitudeInput.value = center.lng();
+    doSearch();
+});
+
+if (startLocation) {
+    startLocation.addEventListener('keyup', (e) => {
+        if (e.keyCode === 13) {
+            if (startLocation.value.length == 0) {
+                alert('Please enter your location');
+                return false;
+            }
+            searchLocation.value = startLocation.value;
+            doSearch();
+            $('#start-modal').modal('hide');
+        }
+    })
 }
 
-$('#start-modal').modal('show');
 document.querySelector('#search-button').addEventListener('click', () => {
     if (startForm === null)
         return;
-
-    const options = {
-        washroom: startForm.elements.washroom.checked,
-        shower: startForm.elements.shower.checked,
-        reststop: startForm.elements.reststop.checked,
-        coffee: startForm.elements.coffee.checked,
-        snacks: startForm.elements.snacks.checked,
-        meal: startForm.elements.meal.checked,
-        drivethrough: startForm.elements.drivethrough.checked,
-        walkthrough: startForm.elements.walkthrough.checked
-    }
-    let tmp = [];
-    for (let i in options) {
-        if (options[i])
-            tmp.push(i);
-    }
-    hiddenOptionsInput.value = tmp.join(',');
-
-    if (useMyLocation.checked && hiddenLatitudeInput.value.length > 0 && hiddenLongitudeInput.value.length > 0) {
-        doSearch();
-    } else {
-        if (startLocation.value.length == 0) {
-            alert('Please enter your location, or check the use my location box');
-            return false;
+    /*
+        const options = {
+            washroom: startForm.elements.washroom.checked,
+            shower: startForm.elements.shower.checked,
+            reststop: startForm.elements.reststop.checked,
+            coffee: startForm.elements.coffee.checked,
+            snacks: startForm.elements.snacks.checked,
+            meal: startForm.elements.meal.checked,
+            drivethrough: startForm.elements.drivethrough.checked,
+            walkthrough: startForm.elements.walkthrough.checked
         }
-        searchLocation.value = startLocation.value;
-        doSearch();
+        let tmp = [];
+        for (let i in options) {
+            if (options[i])
+                tmp.push(i);
+        }
+        hiddenOptionsInput.value = tmp.join(',');
+    */
+    if (startLocation.value.length == 0) {
+        alert('Please enter your location');
+        return false;
     }
+    searchLocation.value = startLocation.value;
+    doSearch();
+
     $('#start-modal').modal('hide');
 });
