@@ -38,11 +38,16 @@
          </form>
       </div>
       <div id="search-this-area">
-         <button type="button" class="btn btn-light btn-sm">Search this area</button>
+         <button type="button" class="btn btn-light">Search this area</button>
       </div>
       <div id="map"></div>
+      <div id="add-business">
+         <button type="button" class="btn btn-success">Add</button>
+      </div>
    </main>
-   <?php require_once 'html/start.html';?>
+<?php
+   require_once 'html/start.html';
+?>
    <script src="js/tw.js"></script>
    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDpsl9O2zNsly1ygES951ava6Ckdtk5Wos&callback=initMap" async defer></script>
 </body>

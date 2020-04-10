@@ -130,7 +130,7 @@ main {
 }
 
 #search-this-area {
-    bottom: 1em;
+    bottom: 2em;
     position: fixed;
     text-align: center;
     width: 100%;
@@ -138,12 +138,28 @@ main {
 }
 
 #search-this-area > button {
-    box-shadow: 0 -1px 24px rgba(0, 0, 0, 0.4);
+    box-shadow: 0 -1px 10px rgba(0, 0, 0, 0.3);
 }
 
 #map {
     height: 100%;
     width: 100%;
+}
+
+#add-business {
+    bottom: 2em;
+    position: fixed;
+    right: 2em;
+    z-index: 15;
+}
+
+#add-business > button {
+    box-shadow: 0 -1px 10px rgba(0, 0, 0, 0.3);
+}
+
+#add-modal .modal-body {
+    height: 60vh;
+    overflow-y: scroll;
 }
 
 .btn-link {

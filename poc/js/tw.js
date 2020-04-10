@@ -21,6 +21,7 @@ const startForm = document.querySelector('#start-form');
 const startLocation = startForm ? startForm.elements['start-location'] : false;
 const searchThisArea = document.querySelector('#search-this-area');
 const searchThisAreaButton = searchThisArea.querySelector('#search-this-area > button');
+const addBusinessButton = document.querySelector('#add-business > button');
 
 const toronto = {
     lat: 43.6532,
@@ -41,7 +42,9 @@ function initMap() {
         mapTypeControl: false,
         mapTypeControlOptions: { style: google.maps.MapTypeControlStyle.DROPDOWN_MENU },
         streetViewControl: false,
-        fullscreenControl: false
+        fullscreenControl: false,
+        scaleControl: true,
+        zoomControl: false
     });
     map.addListener('center_changed', () => {
         if (document.activeElement == searchLocation) {
@@ -169,6 +172,10 @@ searchThisAreaButton.addEventListener('click', () => {
     hiddenLongitudeInput.value = center.lng();
     doSearch();
 });
+
+addBusinessButton.addEventListener('click', () => {
+    window.location.href = 'addsite.php';
+})
 
 if (startLocation) {
     startLocation.addEventListener('keyup', (e) => {
