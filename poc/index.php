@@ -20,6 +20,7 @@
          <li><a href="addsite.php">Add Business</a></li>
          <li><a href="help.html">Help</a></li>
          <li><a href="about.html">About</a></li>
+         <li><a href="mailto:help@truckerswelcome.ca?subject=Mail from TruckersWelcome">Email Us</a></li>
       </ul>
    </aside>
    <div class="overlay"></div>
