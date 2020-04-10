@@ -72,6 +72,8 @@ function geolocate() {
                     hiddenLatitudeInput.value = coordinates.lat;
                     hiddenLongitudeInput.value = coordinates.lng;
                     map.setCenter(coordinates);
+                    useMyLocation.checked = true;
+                    startLocation.disabled = true;
                 }
             },
             function (err) {
@@ -155,7 +157,6 @@ function closeSidenav() {
 if (useMyLocation) {
     useMyLocation.addEventListener('click', () => {
         startLocation.disabled = useMyLocation.checked;
-        startLocation.placeholder = startLocation.disabled ? '' : 'Enter a location to search';
     });
 }
 
