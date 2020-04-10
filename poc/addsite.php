@@ -5,6 +5,27 @@ $msg = "Add a site";
 
 $dbh = 0;
 $entryid=0;
+
+$postIsSafe = 0;
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['recaptcha_response'])) {
+    // Build POST request:
+    $recaptcha_url = 'https://www.google.com/recaptcha/api/siteverify';
+    $recaptcha_secret = $recaptchakey;
+    $recaptcha_response = $_POST['recaptcha_response'];
+
+    // Make and decode POST request:
+    $url = $recaptcha_url . '?secret=' . $recaptcha_secret . '&response=' . $recaptcha_response;
+
+    $recaptcha = file_get_contents($url);
+    $recaptcha = json_decode($recaptcha);
+
+    // Take action based on the score returned:
+    if ($recaptcha->score >= 0.5) {
+       $postIsSafe = 1;
+    }
+} 
+
+
 if (array_key_exists('entryid', $_POST) && !array_key_exists('bizname', $_POST)){
    // The form that was posted only contained the entryid, so it came from an Edit operation
    // Use the entryid to pre-polulate the form
@@ -55,7 +76,7 @@ EOD;
 }
 
 
-if (array_key_exists('bizname', $_POST)){
+if ($postIsSafe && array_key_exists('bizname', $_POST)){
    if (!$dbh){
       try {
          $dbh = new PDO("mysql:host=$servername;dbname=$dbname", $username, $password);
@@ -340,6 +361,15 @@ function sanitize($in) {
    <link rel="stylesheet" href="/bootstrap/css/bootstrap.min.css">
    <script src="/jquery/jquery-3.4.1.min.js"></script>
    <script src="/bootstrap/js/bootstrap.min.js"></script>
+   <script src="https://www.google.com/recaptcha/api.js?render=6LeujegUAAAAAImDheP5SG6ph54m55PIU1gLfkKT"></script>
+   <script>
+        grecaptcha.ready(function () {
+            grecaptcha.execute('6LeujegUAAAAAImDheP5SG6ph54m55PIU1gLfkKT', { action: 'contact' }).then(function (token) {
+                var recaptchaResponse = document.getElementById('recaptchaResponse');
+                recaptchaResponse.value = token;
+            });
+        });
+   </script>   
    <title>Truckers Welcome - Add a site</title>
 </head>
 <body style="margin:10px; padding:10px;">
@@ -369,6 +399,7 @@ function sanitize($in) {
    <input type="text" class="form-control" id="bemail" name="bemail" placeholder="Business email address (blank if unknown)" <?php echo "value=\"$bemail\""?>>
    <input type="text" class="form-control" id="phone" name="phone" placeholder="Phone (e.g. 613-555-2000)" <?php echo "value=\"$phone\""?>>
    <input type="text" class="form-control" id="website" name="website" placeholder="Website (e.g. www.timhortons.ca)" <?php echo "value=\"$website\""?>>
+   <input type="hidden" name="recaptcha_response" id="recaptchaResponse">
    <?php if ($entryid){?>
    <input type=hidden id="entryid" name="entryid" value=<?php echo $entryid;?> >
    <?php }?>
