@@ -20,6 +20,8 @@ const hiddenOptionsInput = searchForm.querySelector('input[name=options]');
 const startForm = document.querySelector('#start-form');
 const startLocation = startForm ? startForm.elements['start-location'] : false;
 const useMyLocation = startForm ? startForm.elements['use-my-location'] : false;
+const searchThisArea = document.querySelector('#search-this-area');
+const searchThisAreaButton = searchThisArea.querySelector('#search-this-area > button');
 
 const toronto = {
     lat: 43.6532,
@@ -72,6 +74,8 @@ function geolocate() {
                     hiddenLatitudeInput.value = coordinates.lat;
                     hiddenLongitudeInput.value = coordinates.lng;
                     map.setCenter(coordinates);
+                    useMyLocation.checked = true;
+                    startLocation.disabled = true;
                 }
             },
             function (err) {
@@ -155,9 +159,17 @@ function closeSidenav() {
 if (useMyLocation) {
     useMyLocation.addEventListener('click', () => {
         startLocation.disabled = useMyLocation.checked;
-        startLocation.placeholder = startLocation.disabled ? '' : 'Enter a location to search';
     });
 }
+
+searchThisAreaButton.addEventListener('click', () => {
+    // get new map center
+    let center = map.getCenter();
+    searchLocation.value = '';
+    hiddenLatitudeInput.value = center.lat();
+    hiddenLongitudeInput.value = center.lng();
+    doSearch();
+});
 
 $('#start-modal').modal('show');
 document.querySelector('#search-button').addEventListener('click', () => {

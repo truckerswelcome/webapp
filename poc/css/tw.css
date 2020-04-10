@@ -129,6 +129,18 @@ main {
     border: 0px;
 }
 
+#search-this-area {
+    bottom: 1em;
+    position: fixed;
+    text-align: center;
+    width: 100%;
+    z-index: 15;
+}
+
+#search-this-area > button {
+    box-shadow: 0 -1px 24px rgba(0, 0, 0, 0.4);
+}
+
 #map {
     height: 100%;
     width: 100%;
