@@ -5,6 +5,7 @@
     <link rel="stylesheet" href="/bootstrap/css/bootstrap.min.css">
     <script src="/jquery/jquery-3.4.1.min.js"></script>
     <script src="/bootstrap/js/bootstrap.min.js"></script>
+    <script src="https://www.google.com/recaptcha/api.js?render=6LeujegUAAAAAImDheP5SG6ph54m55PIU1gLfkKT"></script>
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-social/5.1.1/bootstrap-social.min.css" integrity="undefined" crossorigin="anonymous" />
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" />
@@ -56,7 +57,8 @@
    </main>
 <?php
    require_once 'html/start.html';
-?>
+   require_once 'html/siteInfo.html';
+   ?>
    <script src="js/tw.js"></script>
    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDpsl9O2zNsly1ygES951ava6Ckdtk5Wos&callback=initMap" async defer></script>
 </body>

@@ -162,6 +162,10 @@ main {
     overflow-y: scroll;
 }
 
+#modal-msg2 {
+    display: none;
+}
+
 .btn-link {
     border: none;
     outline: none;
@@ -170,6 +174,19 @@ main {
     text-decoration: none;
     font-family: inherit;
     font-size: inherit;
+}
+
+.grecaptcha-badge {
+    display: none !important;
+}
+
+#services-header {
+    font-weight: bold;
+}
+
+#services-error {
+    display: none;
+    color: red;
 }
 
 @media (min-width: 600px) {

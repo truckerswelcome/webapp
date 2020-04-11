@@ -1,0 +1,125 @@
+<div id="add-modal" class="modal show">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="business-modal-title">Set title</h4>
+                <div id="modal-msg"></div>
+            </div>
+            <div class="modal-body">
+                <div id="modal-msg2">
+                    <span>Please report this error: </span>
+                    <span>msg2</span>
+                </div>
+                <form id="add-business-form" onsubmit="return false;">
+                    <div class="form-group">
+                        <input type="text" class="form-control" id="uname" name="uname"
+                            placeholder="Your Name, (e.g. John Doe)" autocomplete="off">
+                    </div>
+                    <div class="form-group">
+                        <select class="form-control" id="whoareyou" name="whoareyou" onchange="checkWho()">
+                            <option value="" disabled selected>Who are you?</option>
+                            <option>Driver</option>
+                            <option>Facility Owner</option>
+                            <option>Other</option>
+                            <option>Moderator</option>
+                        </select>
+                    </div>
+                    <div id="modpindiv" class="form-group" style="display: none;">
+                        <input type="text" class="form-control" id="modpin" name="modpin" placeholder="Moderator PIN"
+                            autocomplete="off">
+                    </div>
+                    <div class="form-group">
+                        <input type="text" class="form-control" id="bizname" name="bizname"
+                            placeholder="Business Name, (e.g. Tim Hortons)" autocomplete="off">
+                    </div>
+                    <div class="form-group">
+                        <input type="text" class="form-control" id="street" name="street"
+                            placeholder="Street Address (e.g. 11 Monogram Pl)" autocomplete="off">
+                    </div>
+                    <div class="form-group">
+                        <input type="text" class="form-control" id="city" name="city"
+                            placeholder="City / Town (e.g. Trenton)" autocomplete="off">
+                    </div>
+                    <div class="form-group">
+                        <input type="text" class="form-control" id="province" name="province"
+                            placeholder="Province/State (e.g. Ontario)" autocomplete="off">
+                    </div>
+                    <div class="form-group">
+                        <select class="form-control" id="country" name="country">
+                            <option value="" disabled selected>Country</option>
+                            <option>Canada</option>
+                            <option>USA</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <input type="text" class="form-control" id="postal" name="postal"
+                            placeholder="Postal Code (e.g. K8V 5P8)" autocomplete="off">
+                    </div>
+                    <div class="form-group">
+                        <input type="text" class="form-control" id="bemail" name="bemail"
+                            placeholder="Business email address (blank if unknown)" autocomplete="off">
+                    </div>
+                    <div class="form-group">
+                        <input type="text" class="form-control" id="phone" name="phone"
+                            placeholder="Phone (e.g. 613-394-2000)" autocomplete="off">
+                    </div>
+                    <div class="form-group">
+                        <input type="text" class="form-control" id="website" name="website"
+                            placeholder="Website (e.g. www.timhortons.ca)" autocomplete="off">
+                    </div>
+                    <input type="hidden" name="recaptcha_response" id="recaptchaResponse">
+                    <input type="hidden" id="entryid" name="entryid">
+                    <div id="services-header">Services available at this location:</div>
+                    <div id="services-error">You need at least one service</div>
+                    <div class="form-group">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="diesel" name="diesel" />
+                            <label class="form-check-label" for="diesel">Diesel</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="washroom" name="washroom" />
+                            <label class="form-check-label" for="washroom">Washroom</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="shower" name="shower" />
+                            <label class="form-check-label" for="shower">Shower</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="parking" name="parking" />
+                            <label class="form-check-label" for="parking">Parking</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="coffee" name="coffee" />
+                            <label class="form-check-label" for="coffee">Coffee</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="snacks" name="snacks" />
+                            <label class="form-check-label" for="snacks">Snacks</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="meal" name="meal" />
+                            <label class="form-check-label" for="meal">Meal</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="drivethrough" name="drivethrough" />
+                            <label class="form-check-label" for="drivethrough">Drive Through (trucks)</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="walkup" name="walkup" />
+                            <label class="form-check-label" for="walkup">Walk Through (walk up to drivethrough
+                                window)</label>
+                        </div>
+                        <div>
+                            <input type="text" class="form-control" id="other" name="other"
+                                placeholder="Other (e.g. Lounge,TV)">
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" id="submit-site-button">Submit</button>
+            </div>
+        </div>
+    </div>
+</div>
