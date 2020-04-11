@@ -7,6 +7,10 @@ try {
    die("Connection failed: " . $e->getMessage() . "\n");
 }
 
+function sanitize($in) {
+   return htmlentities(trim($in), ENT_QUOTES);
+}
+
 function processGet() {
    global $dbh;
 
@@ -18,25 +22,25 @@ function processGet() {
    if ($sth->execute([$entryid]) === TRUE && $sth->rowCount()) {
       $row = $sth->fetch(PDO::FETCH_ASSOC);
       $response = [
-         'name'            => $row['name'],
-         'address'         => $row['address'],
-         'city'            => $row['city'],
-         'province_state'  => $row['province_state'],
-         'country'         => $row['country'],
-         'postal'          => $row['postal'],
-         'phone'           => $row['phone'],
-         'email'           => $row['email'],
-         'website'         => $row['website'],
-         'diesel'          => $row['diesel'],
-         'washroom'        => $row['washroom'],
-         'shower'          => $row['shower'],
-         'parking'         => $row['reststop'],
-         'coffee'          => $row['coffee'],
-         'snacks'          => $row['snacks'],
-         'meal'            => $row['meal'],
-         'drivethrough'    => $row['drivethrough'],
-         'walkthrough'     => $row['walkthrough'],
-         'otherservices'   => $row['otherservices']
+         'name'            => sanitize($row['name']),
+         'address'         => sanitize($row['address']),
+         'city'            => sanitize($row['city']),
+         'province_state'  => sanitize($row['province_state']),
+         'country'         => sanitize($row['country']),
+         'postal'          => sanitize($row['postal']),
+         'phone'           => sanitize($row['phone']),
+         'email'           => sanitize($row['email']),
+         'website'         => sanitize($row['website']),
+         'diesel'          => sanitize($row['diesel']),
+         'washroom'        => sanitize($row['washroom']),
+         'shower'          => sanitize($row['shower']),
+         'parking'         => sanitize($row['reststop']),
+         'coffee'          => sanitize($row['coffee']),
+         'snacks'          => sanitize($row['snacks']),
+         'meal'            => sanitize($row['meal']),
+         'drivethrough'    => sanitize($row['drivethrough']),
+         'walkthrough'     => sanitize($row['walkthrough']),
+         'otherservices'   => sanitize($row['otherservices'])
       ];
    }
    return $response;
