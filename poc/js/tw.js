@@ -56,15 +56,7 @@ function initPage() {
     });
 
     addBusinessButton.addEventListener('click', () => {
-        businessModalTitle.innerText = 'Add a Business';
-        clearBusinessForm();
-        grecaptcha.ready(function () {
-            grecaptcha.execute('6LeujegUAAAAAImDheP5SG6ph54m55PIU1gLfkKT', { action: 'contact' }).then(function (token) {
-                const recaptchaResponse = document.getElementById('recaptchaResponse');
-                recaptchaResponse.value = token;
-            });
-        });
-        $('#add-modal').modal('show');
+        openBusinessForm();
     })
 
     if (startLocation) {
@@ -152,6 +144,18 @@ function initPage() {
 
         $('#start-modal').modal('hide');
     });
+}
+
+function openBusinessForm() {
+    businessModalTitle.innerText = 'Add a Business';
+    clearBusinessForm();
+    grecaptcha.ready(function () {
+        grecaptcha.execute('6LeujegUAAAAAImDheP5SG6ph54m55PIU1gLfkKT', { action: 'contact' }).then(function (token) {
+            const recaptchaResponse = document.getElementById('recaptchaResponse');
+            recaptchaResponse.value = token;
+        });
+    });
+    $('#add-modal').modal('show');
 }
 
 function generateRecaptcha() {
@@ -306,7 +310,7 @@ function createMarker(result) {
 
     let content = `
 <div id="content">
-    <form action="addsite.php" method="post">
+    <form>
         <B>${name}</B>
         &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
         <input type="hidden" name="entryid" value="${result.id}">
