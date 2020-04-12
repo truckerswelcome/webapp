@@ -46,7 +46,7 @@ function processGet() {
    return $response;
 }
 
-function getSiteObjectInput() {
+function getSiteObjectInput($inputType) {
    $obj = [];
 
    $filters = [
@@ -73,9 +73,9 @@ function getSiteObjectInput() {
       'meal' => FILTER_DEFAULT,
       'drivethrough' => FILTER_DEFAULT,
       'walkup' => FILTER_DEFAULT,
-      'delete' => FILTER_DEFAULT
+      'delete' => FILTER_SANITIZE_NUMBER_INT
    ];
-   $obj = filter_input_array(INPUT_POST, $filters);
+   $obj = filter_input_array($inputType, $filters);
 
    $obj['diesel']       = $obj['diesel'] == 'on' ? 1 : 0;
    $obj['washroom']     = $obj['washroom'] == 'on' ? 1 : 0;
@@ -86,7 +86,6 @@ function getSiteObjectInput() {
    $obj['meal']         = $obj['meal'] == 'on' ? 1 : 0;
    $obj['drivethrough'] = $obj['drivethrough'] == 'on' ? 1 : 0;
    $obj['walkup']       = $obj['walkup'] == 'on' ? 1 : 0;
-   $obj['delete']       = $obj['delete'] == 'on' ? 1 : 0;
 
    return $obj;
 }
@@ -125,7 +124,7 @@ function validateInput($obj, &$approval_status) {
    if (strlen($obj['city']) > 50 || empty($obj['city']))
       $form_errors[] = 'city';
 
-   if (strlen($obj['province']) > 20 || empty($obj['province']))
+   if (strlen($obj['province']) != 2)
       $form_errors[] = 'province';
 
    if (strlen($obj['country']) > 20 || empty($obj['country']))
@@ -151,10 +150,10 @@ function validateInput($obj, &$approval_status) {
 
    // If the user submitting the data is a moderator, we need to know so we can mark the data as valid immediately
    // So if this is a moderator, expect a PIN (temporary solution until we have users/roles)
-   if (0 == strcmp($obj['whoareyou'], "Moderator") && empty($modpin)) {
+   if (0 == strcmp($obj['whoareyou'], "Moderator") && empty($obj['modpin'])) {
       $form_errors[] = 'modpin';
    } else if (0 == strcmp($obj['whoareyou'], "Moderator")) {
-      if (false === array_search($modpin, $modpins)) {
+      if (false === array_search($obj['modpin'], $modpins)) {
          $form_errors[] = 'modpin';
       } else {
          $approval_status = "approved";
@@ -218,7 +217,7 @@ function doUpdate($obj, $lat, $long, $approval_status) {
 
    // for now, deleting a record means to set the active flag to 0
    $active = 1;
-   if ($obj['delete']) {
+   if ($obj['delete'] == 1) {
       $active = 0;
    }
 
@@ -228,7 +227,7 @@ SET
    submitted_by=?, submitter_type=?,
    name=?, address=?, city=?, province_state=?, country=?, postal=?, 
    email=?, phone=?, website=?, 
-   active=?, 
+   approval_status=?, active=?, 
    diesel=?, washroom=?, shower=?, reststop=?, coffee=?, snacks=?, meal=?, drivethrough=?, walkthrough=?,
    otherservices=?,
    lat=?, lng=? 
@@ -238,7 +237,7 @@ EOD;
       $obj['uname'], $obj['whoareyou'],
       $obj['bizname'], $obj['street'], $obj['city'], $obj['province'], $obj['country'], $obj['postal'],
       $obj['bemail'], $obj['phone'], $obj['website'],
-      $active,
+      $approval_status, $active,
       $obj['diesel'], $obj['washroom'], $obj['shower'], $obj['parking'], $obj['coffee'], $obj['snacks'], $obj['meal'], $obj['drivethrough'], $obj['walkup'],
       $obj['other'],
       $lat, $long, 
@@ -305,32 +304,39 @@ EOD;
    return $result;
 }
 
-function processPost() {
+function isRecaptchaValid() {
    global $recaptchakey;
 
-   $obj = getSiteObjectInput();
-   
-   $postIsSafe = 0;
+   $rc = false;
+
    if (isset($_POST['recaptcha_response'])) {
-      // Build POST request:
-      $recaptcha_url = 'https://www.google.com/recaptcha/api/siteverify';
-      $recaptcha_secret = $recaptchakey;
       $recaptcha_response = $_POST['recaptcha_response'];
-  
-      // Make and decode POST request:
-      $url = $recaptcha_url . '?secret=' . $recaptcha_secret . '&response=' . $recaptcha_response;
-  
-      $recaptcha = file_get_contents($url);
-      $recaptcha = json_decode($recaptcha);
-  
-      // Take action based on the score returned:
-      if ($recaptcha->score >= 0.5) {
-         $postIsSafe = 1;
-      }
+   } else {
+      return $rc;
    }
 
-   if ($postIsSafe == 0) {
-      return;
+   // Build POST request:
+   $recaptcha_url = 'https://www.google.com/recaptcha/api/siteverify';
+   $recaptcha_secret = $recaptchakey;
+
+   // Make and decode POST request:
+   $url = $recaptcha_url . '?secret=' . $recaptcha_secret . '&response=' . $recaptcha_response;
+
+   $recaptcha = file_get_contents($url);
+   $recaptcha = json_decode($recaptcha);
+
+   // Take action based on the score returned:
+   if ($recaptcha->score >= 0.5) {
+      $rc = true;
+   }
+   return $rc;
+}
+
+function processPost() {
+   $obj = getSiteObjectInput(INPUT_POST);
+   
+   if (!isRecaptchaValid()) {
+      return ['success' => false];
    }
 
    $approval_status = 'pending';
