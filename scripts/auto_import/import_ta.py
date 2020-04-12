@@ -112,7 +112,7 @@ def printSql():
             "CAFÉ' EXPRESS": 'cafe'
         })
 
-    sqlinsert = 'INSERT INTO facilities (submitted_by, submitter_type, name, address, city, province_state, country, postal, email, phone, website, approval_status, diesel, shower, lat, lng)'
+    sqlinsert = 'INSERT INTO facilities (submitted_by, submitter_type, name, address, city, province_state, country, postal, email, phone, website, approval_status, diesel, shower, meal, lat, lng)'
 
     # print each row as an insert statement. This way if a syntax error arrises
     # in the future, as many rows as possible can be imported successfully.
@@ -123,18 +123,20 @@ def printSql():
         address = pymysql.escape_string(row.address)
         city = pymysql.escape_string(row.city)
         province_state = pymysql.escape_string(row.state)
-        country = 'USA'
+        country = 'US' if (row.province_state != 'ON') else 'CA'
         postal = row.zipcode
         email = ''
         phone = pymysql.escape_string(row.phone)
-        website = 'https://www.ta-petro.com'
+        webname = row.name.split(' Dedication')[0].lower().replace(' ', '-').replace('.', '')
+        website = f'https://www.ta-petro.com/location/{province_state.lower()}/{webname}'
         approval_status = 'approved'
         diesel = 1 if (row.diesel_lanes > 0) else 0
         shower = 1 if (row.private_showers + row.handicapped_showers > 0) else 0
+        meal = 1 if (row.restaurant != 'No') else 0
         lat = row.lat
         lng = row.long
 
-        sqlvalues = f"VALUES ('{submitted_by}', '{submitter_type}', '{name}', '{address}', '{city}', '{province_state}', '{country}', '{postal}', '{email}', '{phone}', '{website}', '{approval_status}', '{diesel}', '{shower}', '{lat}', '{lng}');"
+        sqlvalues = f"VALUES ('{submitted_by}', '{submitter_type}', '{name}', '{address}', '{city}', '{province_state}', '{country}', '{postal}', '{email}', '{phone}', '{website}', '{approval_status}', '{diesel}', '{shower}', '{meal}', '{lat}', '{lng}');"
 
         print('{} {}'.format(sqlinsert, sqlvalues))
 

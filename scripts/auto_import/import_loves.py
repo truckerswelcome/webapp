@@ -108,9 +108,9 @@ def printSql():
             'Restaurants': 'restaurant'
         })
 
-    sqlinsert = 'INSERT INTO facilities (submitted_by, submitter_type, name, address, city, province_state, country, postal, email, phone, website, approval_status, diesel, shower, lat, lng)'
+    sqlinsert = 'INSERT INTO facilities (submitted_by, submitter_type, name, address, city, province_state, country, postal, email, phone, website, approval_status, diesel, shower, meal, lat, lng)'
 
-    # print each row as an insert statement. This way if a syntax error arrises
+    # print each row as an insert statement. This way if a syntax error arises
     # in the future, as many rows as possible can be imported successfully.
     for row in newsheet.itertuples():
         submitted_by = 'Loves importer'
@@ -123,14 +123,15 @@ def printSql():
         postal = row.zipcode
         email = ''
         phone = pymysql.escape_string(row.phone)
-        website = 'https://loves.com'
+        website = f'https://loves.com/locations/{row.Index}'
         approval_status = 'approved'
         diesel = 1
         shower = 1 if (row.private_showers == 'Y') else 0
+        meal = 1 if (row.restaurant != 'No') else 0
         lat = row.lat
         lng = row.long
 
-        sqlvalues = f"VALUES ('{submitted_by}', '{submitter_type}', '{name}', '{address}', '{city}', '{province_state}', '{country}', '{postal}', '{email}', '{phone}', '{website}', '{approval_status}', '{diesel}', '{shower}', '{lat}', '{lng}');"
+        sqlvalues = f"VALUES ('{submitted_by}', '{submitter_type}', '{name}', '{address}', '{city}', '{province_state}', '{country}', '{postal}', '{email}', '{phone}', '{website}', '{approval_status}', '{diesel}', '{shower}', '{meal}', '{lat}', '{lng}');"
 
         print('{} {}'.format(sqlinsert, sqlvalues))
 

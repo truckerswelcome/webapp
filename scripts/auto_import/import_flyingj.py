@@ -102,7 +102,7 @@ def printSql():
             'Facilities/Restaurants': 'restaurant'
         })
 
-    sqlinsert = 'INSERT INTO facilities (submitted_by, submitter_type, name, address, city, province_state, country, postal, email, phone, website, approval_status, diesel, shower, lat, lng)'
+    sqlinsert = 'INSERT INTO facilities (submitted_by, submitter_type, name, address, city, province_state, country, postal, email, phone, website, approval_status, diesel, shower, meal, lat, lng)'
 
     # print each row as an insert statement. This way if a syntax error arrises
     # in the future, as many rows as possible can be imported successfully.
@@ -117,14 +117,15 @@ def printSql():
         postal = row.zipcode
         email = ''
         phone = pymysql.escape_string(row.phone)
-        website = 'https://pilotflyingj.com'
+        website = f'https://pilotflyingj.com/stores/{row.Index}'
         approval_status = 'approved'
         diesel = 1 if (row.diesel != 0) else 0
         shower = 1 if (row.private_showers != 0) else 0
+        meal = 1 if (row.restaurant != 'No') else 0
         lat = row.lat
         lng = row.long
 
-        sqlvalues = f"VALUES ('{submitted_by}', '{submitter_type}', '{name}', '{address}', '{city}', '{province_state}', '{country}', '{postal}', '{email}', '{phone}', '{website}', '{approval_status}', '{diesel}', '{shower}', '{lat}', '{lng}');"
+        sqlvalues = f"VALUES ('{submitted_by}', '{submitter_type}', '{name}', '{address}', '{city}', '{province_state}', '{country}', '{postal}', '{email}', '{phone}', '{website}', '{approval_status}', '{diesel}', '{shower}', '{meal}', '{lat}', '{lng}');"
 
         print('{} {}'.format(sqlinsert, sqlvalues))
 
