@@ -123,7 +123,7 @@ def printSql():
         address = pymysql.escape_string(row.address)
         city = pymysql.escape_string(row.city)
         province_state = pymysql.escape_string(row.state)
-        country = 'US' if (row.province_state != 'ON') else 'CA'
+        country = 'US' if (row.state != 'ON') else 'CA'
         postal = row.zipcode
         email = ''
         phone = pymysql.escape_string(row.phone)
