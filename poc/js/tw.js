@@ -24,11 +24,16 @@ const searchThisArea = document.querySelector('#search-this-area');
 const searchThisAreaButton = searchThisArea.querySelector('#search-this-area > button');
 const addBusinessButton = document.querySelector('#add-business > button');
 const siteForm = document.querySelector('#add-business-form');
+const countrySelect = siteForm.querySelector('#country');
+const provinceSelect = siteForm.querySelector('#province');
+const provinceSelectDefault = siteForm.querySelector('#province-default');
+const postalInput = siteForm.querySelector('#postal');
 const businessModalTitle = document.querySelector('#business-modal-title');
 const servicesError = document.querySelector('#services-error');
 const siteModalMsg = document.querySelector('#modal-msg');
 const siteModalMsg2 = document.querySelector('#modal-msg2');
 const submitSiteButton = document.querySelector('#submit-site-button');
+const deleteSiteButton = document.querySelector('#delete-site-button');
 
 const toronto = {
     lat: 43.6532,
@@ -56,8 +61,14 @@ function initPage() {
     });
 
     addBusinessButton.addEventListener('click', () => {
+        businessModalTitle.innerText = 'Add a Business';
         openBusinessForm();
-    })
+    });
+
+    countrySelect.addEventListener('change', (e) => {
+        const val = e.target.value;
+        setCountrySelectOptions(val);
+    });
 
     if (startLocation) {
         startLocation.addEventListener('keyup', (e) => {
@@ -85,6 +96,8 @@ function initPage() {
                     if (data.success) {
                         siteModalMsg.innerText = 'Success';
                         // should the modal be closed now?
+                        submitSiteButton.style.display = 'none';
+                        deleteSiteButton.style.display = 'none';
                     } else {
                         // generate another recaptcha token
                         generateRecaptcha();
@@ -112,6 +125,36 @@ function initPage() {
             xhr.send(new FormData(siteForm));
             return false;
         });
+
+        if (deleteSiteButton) {
+            deleteSiteButton.addEventListener('click', () => {
+                if (confirm("Are you sure you want to delete this business?") === true) {
+                    siteForm.delete.value = 1;
+                    let xhr = new XMLHttpRequest();
+                    xhr.onreadystatechange = function () {
+                        if (xhr.readyState == 4) {
+                            xhr.onreadystatechange = function () { };
+                            let data = JSON.parse(xhr.responseText);
+                            // only show the close button now
+                            if (data.success) {
+                                siteModalMsg.innerText = 'Success';
+                                // should the modal be closed now?
+                                submitSiteButton.style.display = 'none';
+                                deleteSiteButton.style.display = 'none';
+                            } else {
+                                siteModalMsg.innerText = 'Error deleting business';
+                                if (data.sqlerror) {
+                                    siteModalMsg2.innerText = data.sqlerror.join('<br/>');
+                                }
+                            }
+                        }
+                    };
+                    xhr.open('POST', 'site.php', true);
+                    xhr.send(new FormData(siteForm));
+                }
+                return false;
+            });
+        }
     }
 
     startSearchButton.addEventListener('click', () => {
@@ -147,14 +190,10 @@ function initPage() {
 }
 
 function openBusinessForm() {
-    businessModalTitle.innerText = 'Add a Business';
     clearBusinessForm();
-    grecaptcha.ready(function () {
-        grecaptcha.execute('6LeujegUAAAAAImDheP5SG6ph54m55PIU1gLfkKT', { action: 'contact' }).then(function (token) {
-            const recaptchaResponse = document.getElementById('recaptchaResponse');
-            recaptchaResponse.value = token;
-        });
-    });
+    generateRecaptcha();
+    submitSiteButton.style.display = 'block';
+    deleteSiteButton.style.display = 'none';
     $('#add-modal').modal('show');
 }
 
@@ -262,6 +301,87 @@ function doSearch() {
     return false;
 }
 
+function setCountrySelectOptions(country) {
+    switch (country) {
+        case 'Canada':
+            provinceSelect.innerHTML = `
+                <option id="province-default" value="" disabled selected>Province</option>
+                <option value="AB">Alberta</option>
+                <option value="BC">British Columbia</option>
+                <option value="MB">Manitoba</option>
+                <option value="NB">New Brunswick</option>
+                <option value="NL">Newfoundland and Labrador</option>
+                <option value="NS">Nova Scotia</option>
+                <option value="ON">Ontario</option>
+                <option value="PE">Prince Edward Island</option>
+                <option value="QC">Quebec</option>
+                <option value="SK">Saskatchewan</option>
+                <option value="NT">Northwest Territories</option>
+                <option value="NU">Nunavut</option>
+                <option value="YT">Yukon</option>
+`;
+            postalInput.placeholder = 'Postal Code';
+            break;
+        case 'USA':
+            provinceSelect.innerHTML = `
+                <option id="province-default" value="" disabled selected>State</option>
+                <option value="AL">Alabama</option>
+                <option value="AK">Alaska</option>
+                <option value="AZ">Arizona</option>
+                <option value="AR">Arkansas</option>
+                <option value="CA">California</option>
+                <option value="CO">Colorado</option>
+                <option value="CT">Connecticut</option>
+                <option value="DE">Delaware</option>
+                <option value="DC">District Of Columbia</option>
+                <option value="FL">Florida</option>
+                <option value="GA">Georgia</option>
+                <option value="HI">Hawaii</option>
+                <option value="ID">Idaho</option>
+                <option value="IL">Illinois</option>
+                <option value="IN">Indiana</option>
+                <option value="IA">Iowa</option>
+                <option value="KS">Kansas</option>
+                <option value="KY">Kentucky</option>
+                <option value="LA">Louisiana</option>
+                <option value="ME">Maine</option>
+                <option value="MD">Maryland</option>
+                <option value="MA">Massachusetts</option>
+                <option value="MI">Michigan</option>
+                <option value="MN">Minnesota</option>
+                <option value="MS">Mississippi</option>
+                <option value="MO">Missouri</option>
+                <option value="MT">Montana</option>
+                <option value="NE">Nebraska</option>
+                <option value="NV">Nevada</option>
+                <option value="NH">New Hampshire</option>
+                <option value="NJ">New Jersey</option>
+                <option value="NM">New Mexico</option>
+                <option value="NY">New York</option>
+                <option value="NC">North Carolina</option>
+                <option value="ND">North Dakota</option>
+                <option value="OH">Ohio</option>
+                <option value="OK">Oklahoma</option>
+                <option value="OR">Oregon</option>
+                <option value="PA">Pennsylvania</option>
+                <option value="RI">Rhode Island</option>
+                <option value="SC">South Carolina</option>
+                <option value="SD">South Dakota</option>
+                <option value="TN">Tennessee</option>
+                <option value="TX">Texas</option>
+                <option value="UT">Utah</option>
+                <option value="VT">Vermont</option>
+                <option value="VA">Virginia</option>
+                <option value="WA">Washington</option>
+                <option value="WV">West Virginia</option>
+                <option value="WI">Wisconsin</option>
+                <option value="WY">Wyoming</option>
+`;
+            postalInput.placeholder = 'ZIP Code';
+            break;
+    }
+}
+
 function getSite(id) {
     let xhr = new XMLHttpRequest();
     xhr.onreadystatechange = function () {
@@ -271,6 +391,7 @@ function getSite(id) {
             // populate the business form
             businessModalTitle.innerText = 'Edit Business';
             clearBusinessFormErrors();
+            setCountrySelectOptions(data.country);
             siteForm.bizname.value = data.name;
             siteForm.street.value = data.address;
             siteForm.city.value = data.city;
@@ -281,6 +402,7 @@ function getSite(id) {
             siteForm.phone.value = data.phone;
             siteForm.website.value = data.website;
             siteForm.entryid.value = id;
+            siteForm.delete.value = 0;
             siteForm.diesel.checked = data.diesel == 1;
             siteForm.washroom.checked = data.washroom == 1;
             siteForm.shower.checked = data.shower == 1;
@@ -291,6 +413,10 @@ function getSite(id) {
             siteForm.walkup.checked = data.walkthrough == 1;
             siteForm.other.value = data.otherservices;
             generateRecaptcha();
+
+            submitSiteButton.style.display = 'block';
+            deleteSiteButton.style.display = 'block';
+
             $('#add-modal').modal('show');
         }
     };
@@ -379,14 +505,15 @@ function clearBusinessForm() {
     siteForm.phone.value = '';
     siteForm.website.value = '';
     siteForm.entryid.value = '';
-    siteForm.diesel.checked = 0;
-    siteForm.washroom.checked = 0;
-    siteForm.shower.checked = 0;
-    siteForm.coffee.checked = 0;
-    siteForm.snacks.checked = 0;
-    siteForm.meal.checked = 0;
-    siteForm.drivethrough.checked = 0;
-    siteForm.walkup.checked = 0;
+    siteForm.delete.value = 0;
+    siteForm.diesel.checked = false;
+    siteForm.washroom.checked = false;
+    siteForm.shower.checked = false;
+    siteForm.coffee.checked = false;
+    siteForm.snacks.checked = false;
+    siteForm.meal.checked = false;
+    siteForm.drivethrough.checked = false;
+    siteForm.walkup.checked = false;
     siteForm.other.value = '';
 }
 

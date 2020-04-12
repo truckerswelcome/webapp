@@ -157,9 +157,20 @@ main {
     box-shadow: 0 -1px 10px rgba(0, 0, 0, 0.3);
 }
 
+#add-modal .modal-content {
+    height: 90vh;
+}
+
 #add-modal .modal-body {
-    height: 60vh;
     overflow-y: scroll;
+}
+
+#add-modal .modal-footer {
+    justify-content: center;
+}
+
+#add-modal .modal-footer #delete-site-button {
+    margin-right: auto;
 }
 
 #modal-msg2 {
