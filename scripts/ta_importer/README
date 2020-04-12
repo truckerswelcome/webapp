@@ -1,0 +1,42 @@
+##################################
+# Initialize virtual environment
+##################################
+
+# create a virtual environment using python3
+virtualenv -p python3 venv
+
+# activate the virtual environment
+source ./venv/bin/activate
+
+# install required packages
+pip install -r requirements.txt
+
+# deactivate virtual environment
+deactivate
+
+###########################################
+# Run importer within virtual environment
+###########################################
+# after initial setup, only activate env
+# and run importer
+
+# activate the virtual environment
+source ./venv/bin/activate
+
+# run the importer
+python ta_importer.py > ta.sql
+
+# deactivate virtual environment
+deactivate
+
+##########################################
+# use the generated sql script as needed
+##########################################
+
+# The output is sql statements, choose how
+# you would like to execute the sql.
+# This should work with any database.
+# For example, mysql:
+mysql -h 10.31.144.3 -u twappdbuser -p truckerswelcome < ta.sql
+
+

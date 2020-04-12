@@ -9,7 +9,7 @@ function connectToDatabase() {
 	require_once "$envFile";
 
 	try {
-		return new PDO("mysql:host=$servername;dbname=$dbname;port=3398;", $username, $password);
+		return new PDO("mysql:host=$servername;dbname=$dbname", $username, $password);
 	} catch (PDOException $e) {
 		die("Connection failed: " . $e->getMessage() . "\n");
 	}
@@ -120,7 +120,9 @@ function main() {
 	echo "Starting Facilities Moderation...\n";
 
 	$dbHandler = connectToDatabase();
-	foreach (getPendingFacilities($dbHandler) as $facility) {
+
+	$pendingFacilities = getPendingFacilities($dbHandler);
+	foreach ($pendingFacilities as $facility) {
 		$answer = promptUserForValidAnswer($facility);
 
 		if ($answer === "approve") {
@@ -133,5 +135,24 @@ function main() {
 	echo "Done moderating...See you next time!\n";
 }
 
-
-main();
+if ($argc == 1){
+	main();
+}else if ($argc==3 && $argv[1] == "modcron"){
+	echo "Checking for entries needing moderation\n";
+	$dbHandler = connectToDatabase();
+	$pendingFacilities = getPendingFacilities($dbHandler);
+	$numEntries = sizeof($pendingFacilities);
+	if ($numEntries){
+		$envFile = $argv[2];
+		require "$envFile";
+		$message = "There are $numEntries entries in the facilities database in need of moderator approval";
+		$hmessage = array('payload' => json_encode(array('text' => $message)));
+		// Use curl to send your message
+		$c = curl_init($slackhook);
+		curl_setopt($c, CURLOPT_SSL_VERIFYPEER, false);
+		curl_setopt($c, CURLOPT_POST, true);
+		curl_setopt($c, CURLOPT_POSTFIELDS, $hmessage);
+		curl_exec($c);
+		curl_close($c);      
+	}
+}
