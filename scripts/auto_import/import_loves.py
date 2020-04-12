@@ -1,38 +1,46 @@
-# from urllib.request import urlopen as urlreq
+import urllib.request
+import urllib.parse
 import sys
 import pandas as pd
 import pymysql
 from os import mkdir
 
-# cacheFileName = 'cache/ta-locations.xls'
-cacheFileName = 'Loves.xlsx'
-# def downloadLocationList():
-#     url = 'http://www.ta-petro.com/assets/ce/Documents/Master-Location-List.xls'
-#     client = urlreq(url)
-#     sheet = client.read()
-#     client.close()
-#     print("Location list read from website.", file=sys.stderr)
-#     try:
-#         mkdir('cache')
-#     except FileExistsError:
-#         # ignore an error that indicates cache already exists
-#         pass
-#     file = open(cacheFileName, 'wb')
-#     file.write(sheet)
-#     file.close()
+cacheFileName = 'cache/loves_locations.xlsx'
+def downloadLocationList():
+    url = 'https://www.loves.com/api/sitecore/StoreSearch/Download'
+    values = {
+        'locationSearch':'{"StoreTypes":["Travel Stop"],"Amenities":[],"Restaurants":[],"FoodConcepts":[],"State":"All"}',
+        'lat': '0.0',
+        'lng': '0.0'
+    }
+    data = urllib.parse.urlencode(values)
+    data = data.encode('ascii')
+    req = urllib.request.Request(url, data)
+    with urllib.request.urlopen(req) as response:
+        sheet = response.read()
+    response.close()
+    print("Location list read from website.", file=sys.stderr)
+    try:
+        mkdir('cache')
+    except FileExistsError:
+        # ignore an error that indicates cache already exists
+        pass
+    file = open(cacheFileName, 'wb')
+    file.write(sheet)
+    file.close()
 
 
-# def getLocationlist():
+def getLocationlist():
 
-#     try:
-#         # first try to read from local file cache
-#         file = open(cacheFileName, 'rb')
-#         file.close()
+    try:
+        # first try to read from local file cache
+        file = open(cacheFileName, 'rb')
+        file.close()
 
-#         print("Location list read from cache.", file=sys.stderr)
-#     except Exception as e:
-#         # not found in cache, download from website
-#         downloadLocationList()
+        print("Location list read from cache.", file=sys.stderr)
+    except Exception as e:
+        # not found in cache, download from website
+        downloadLocationList()
 
 
 def printSql():
@@ -129,7 +137,7 @@ def printSql():
 
 
 def main():
-    # getLocationlist()
+    getLocationlist()
     printSql()
 
 
