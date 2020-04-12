@@ -95,15 +95,15 @@ function validateInput($obj, &$approval_status) {
 
    $form_errors = [];
 
-   if (!obj['diesel'] &&
-      !$obj['washroom'] && 
-      !$obj['shower'] && 
-      !$obj['parking'] && 
-      !$obj['coffee'] && 
-      !$obj['snacks'] && 
-      !$obj['meal'] && 
-      !$obj['drivethrough'] && 
-      !$obj['walkup'])
+   if (  !$obj['diesel'] &&
+         !$obj['washroom'] && 
+         !$obj['shower'] && 
+         !$obj['parking'] && 
+         !$obj['coffee'] && 
+         !$obj['snacks'] && 
+         !$obj['meal'] && 
+         !$obj['drivethrough'] && 
+         !$obj['walkup'] )
    {
       $form_errors[] = 'services';
    }
