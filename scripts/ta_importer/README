@@ -37,6 +37,6 @@ deactivate
 # you would like to execute the sql.
 # This should work with any database.
 # For example, mysql:
-mysql -h 10.31.144.3 -u twappdbuser -p truckerswelcome < ta.sql
+mysql -h 10.31.32.33 -u dbuse -p dbname < ta.sql
 
 
