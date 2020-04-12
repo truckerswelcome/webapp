@@ -62,11 +62,7 @@ function initPage() {
 
     addBusinessButton.addEventListener('click', () => {
         businessModalTitle.innerText = 'Add a Business';
-        clearBusinessForm();
-        generateRecaptcha();
-        submitSiteButton.style.display = 'block';
-        deleteSiteButton.style.display = 'none';
-        $('#add-modal').modal('show');
+        openBusinessForm();
     });
 
     countrySelect.addEventListener('change', (e) => {
@@ -191,6 +187,14 @@ function initPage() {
 
         $('#start-modal').modal('hide');
     });
+}
+
+function openBusinessForm() {
+    clearBusinessForm();
+    generateRecaptcha();
+    submitSiteButton.style.display = 'block';
+    deleteSiteButton.style.display = 'none';
+    $('#add-modal').modal('show');
 }
 
 function generateRecaptcha() {
