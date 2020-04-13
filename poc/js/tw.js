@@ -186,6 +186,10 @@ function initPage() {
 
         $('#start-modal').modal('hide');
     });
+    
+    if (window.location.href.indexOf("about") > -1) {
+       openAboutModal();
+    }
 }
 
 function openBusinessForm() {
