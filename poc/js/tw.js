@@ -194,8 +194,18 @@ function openBusinessForm() {
     generateRecaptcha();
     submitSiteButton.style.display = 'block';
     deleteSiteButton.style.display = 'none';
+    businessModalTitle.innerText = 'Add a Business';
     $('#add-modal').modal('show');
 }
+
+function openAboutModal() {
+    $('#about-modal').modal('show');
+}
+
+function openToSModal() {
+    $('#tos-modal').modal('show');
+}
+
 
 function generateRecaptcha() {
     grecaptcha.ready(function () {
