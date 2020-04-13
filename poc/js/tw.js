@@ -194,6 +194,7 @@ function openBusinessForm() {
     generateRecaptcha();
     submitSiteButton.style.display = 'block';
     deleteSiteButton.style.display = 'none';
+    businessModalTitle.innerText = 'Add a Business';
     $('#add-modal').modal('show');
     closeSidenav();
     return false;

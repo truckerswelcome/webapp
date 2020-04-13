@@ -26,7 +26,7 @@
          <li><a href="#" onclick="return openAboutModal();">About Truckers Welcome</a></li>
          <li><a href="mailto:help@truckerswelcome.ca?subject=Mail from TruckersWelcome">Email Us</a></li>
          <li><a href="#" onclick="return openTermsOfServiceModal();">Terms of Service</a></li>
-          <li>
+         <li>
               <a class="btn btn-social-icon btn-facebook" href="https://www.facebook.com/sharer/sharer.php?u=https://truckerswelcome.ca/"><span class="fa fa-facebook"></span></a>
               <a class="btn btn-social-icon btn-twitter" href="https://twitter.com/intent/tweet?text=Help%20front%20line%20workers%20who%20are%20keeping%20goods%20and%20supplies%20flowing%20to%20our%20grocery%20stores,%20hospitals%20and%20community%20members%20stay%20safe!%20%0A%0ASuggest%20places%20where%20they%20can%20get%20access%20to%20services%20safely%20while%20traveling.%20Also,%20please%20help%20us%20share%20the%20word%20around!"><span class="fa fa-twitter"></span></a>
               <a class="btn btn-social-icon btn-linkedin" href="https://www.linkedin.com/shareArticle?mini=true&url=https://truckerswelcome.ca/&summary=Help%20front%20line%20workers%20who%20are%20keeping%20goods%20and%20supplies%20flowing%20to%20our%20grocery%20stores,%20hospitals%20and%20community%20members%20stay%20safe!%20%0A%0ASuggest%20places%20where%20they%20can%20get%20access%20to%20services%20safely%20while%20traveling.%20Also,%20please%20help%20us%20share%20the%20word%20around!"><span class="fa fa-linkedin"></span></a>
