@@ -61,7 +61,6 @@ function initPage() {
     });
 
     addBusinessButton.addEventListener('click', () => {
-        businessModalTitle.innerText = 'Add a Business';
         openBusinessForm();
     });
 
@@ -190,12 +189,43 @@ function initPage() {
 }
 
 function openBusinessForm() {
+    businessModalTitle.innerText = 'Add a Business';
     clearBusinessForm();
     generateRecaptcha();
     submitSiteButton.style.display = 'block';
     deleteSiteButton.style.display = 'none';
     $('#add-modal').modal('show');
+    closeSidenav();
+    return false;
 }
+
+function openAboutModal() {
+    $('#about-modal').modal('show');
+    closeSidenav();
+    return false;
+}
+
+function openTermsOfServiceModal() {
+    $('#tos-modal').modal('show');
+    closeSidenav();
+    return false;
+}
+
+$('div.modal').on('show.bs.modal', function () {
+    var modal = this;
+    var hash = modal.id;
+    window.location.hash = hash;
+    window.onhashchange = function () {
+        if (!location.hash) {
+            $(modal).modal('hide');
+        }
+    }
+});
+
+$('div.modal').on('hide', function () {
+    var hash = this.id;
+    history.pushState('', document.title, window.location.pathname);
+});
 
 function generateRecaptcha() {
     grecaptcha.ready(function () {

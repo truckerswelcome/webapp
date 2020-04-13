@@ -157,15 +157,19 @@ main {
     box-shadow: 0 -1px 10px rgba(0, 0, 0, 0.3);
 }
 
-#add-modal .modal-content {
+.modal-content {
     height: 90vh;
 }
 
-#add-modal .modal-body {
+#start-modal .modal-content {
+    height: initial;
+}
+
+.modal-body {
     overflow-y: scroll;
 }
 
-#add-modal .modal-footer {
+.modal-footer {
     justify-content: center;
 }
 
