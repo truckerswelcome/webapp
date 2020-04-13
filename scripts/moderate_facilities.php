@@ -4,8 +4,7 @@ function sanitize($in) {
 	return htmlentities(trim($in), ENT_QUOTES);
 }
 
-function connectToDatabase() {
-	$envFile = getenv('ENV_FILE');
+function connectToDatabase($envFile) {
 	require_once "$envFile";
 
 	try {
@@ -101,6 +100,17 @@ function approveFacility($dbHandler, $facility) {
 	}
 }
 
+function autoApproveAll($dbHandler) {
+	echo "Approving...\n\n";
+	$sql = "UPDATE `facilities` SET approval_status='approved' WHERE active=1 AND approval_status=?;";
+	$parameters = ["pending"];
+	$statement = $dbHandler->prepare($sql);
+	if ($statement->execute($parameters) !== TRUE) {
+		echo "[ERROR] approving facility " . $facility['id'] . ": " . $facility['name'] . "...";
+		exit(1);
+	}
+}
+
 
 function rejectFacility($dbHandler, $facility) {
 	echo "Rejecting...\n\n";
@@ -118,8 +128,8 @@ function rejectFacility($dbHandler, $facility) {
 
 function main() {
 	echo "Starting Facilities Moderation...\n";
-
-	$dbHandler = connectToDatabase();
+	$envFile = getenv('ENV_FILE');
+	$dbHandler = connectToDatabase($envFile);
 
 	$pendingFacilities = getPendingFacilities($dbHandler);
 	foreach ($pendingFacilities as $facility) {
@@ -137,15 +147,20 @@ function main() {
 
 if ($argc == 1){
 	main();
-}else if ($argc==3 && $argv[1] == "modcron"){
+}else if ($argc >= 3 && $argv[1] == "modcron"){
 	echo "Checking for entries needing moderation\n";
-	$dbHandler = connectToDatabase();
+	$envFile = $argv[2];
+	$dbHandler = connectToDatabase($envFile);
 	$pendingFacilities = getPendingFacilities($dbHandler);
 	$numEntries = sizeof($pendingFacilities);
 	if ($numEntries){
-		$envFile = $argv[2];
 		require "$envFile";
-		$message = "There are $numEntries entries in the facilities database in need of moderator approval";
+		$message = "There are $numEntries entries in the facilities database in need of moderator approval.";
+		
+		if ($argc == 4 && $argv[3] == "autoapprove"){
+			autoApproveAll($dbHandler);
+			$message = $message . " Entries auto-approved by cron.\n";
+		}      
 		$hmessage = array('payload' => json_encode(array('text' => $message)));
 		// Use curl to send your message
 		$c = curl_init($slackhook);
@@ -155,4 +170,5 @@ if ($argc == 1){
 		curl_exec($c);
 		curl_close($c);      
 	}
+
 }
