@@ -364,6 +364,7 @@ function doSearch() {
 
 function setCountrySelectOptions(country) {
     switch (country) {
+        case 'CA':
         case 'Canada':
             provinceSelect.innerHTML = `
                 <option id="province-default" value="" disabled selected>Province</option>
@@ -383,6 +384,7 @@ function setCountrySelectOptions(country) {
 `;
             postalInput.placeholder = 'Postal Code';
             break;
+        case 'US':
         case 'USA':
             provinceSelect.innerHTML = `
                 <option id="province-default" value="" disabled selected>State</option>

@@ -173,11 +173,8 @@ function validateInput($obj, &$approval_status) {
       if (!empty($bemail) && !filter_var($bemail, FILTER_VALIDATE_EMAIL))
          $form_errors[] = 'bemail';
 
-      if (0 == strcasecmp($obj['country'], "canada"))
-         $obj['country'] = "Canada";
-      else if (0 == strcasecmp($obj['country'], "usa"))
-         $obj['country'] = "USA";
-      else
+      $countries = ['CA', 'US'];
+      if (!in_array($obj['country'], $countries))
          $form_errors[] = 'country';
 
       if (!ctype_alnum($obj['postal']))

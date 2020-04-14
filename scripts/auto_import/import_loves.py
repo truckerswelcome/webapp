@@ -119,7 +119,7 @@ def printSql():
         address = pymysql.escape_string(row.address)
         city = pymysql.escape_string(row.city)
         province_state = pymysql.escape_string(row.state)
-        country = 'USA'
+        country = 'US'
         postal = row.zipcode
         email = ''
         phone = pymysql.escape_string(row.phone)
