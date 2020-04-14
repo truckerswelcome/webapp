@@ -11,4 +11,4 @@ Instagram: https://www.instagram.com/truckerswelcome/
 
 
 Next Meeting:
-Not schedules
+Not scheduled
