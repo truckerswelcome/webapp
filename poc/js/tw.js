@@ -488,8 +488,6 @@ function createMarker(result) {
     <a href="${mapsurl}">Open in Google Maps</a>
     <BR><BR>
     Problems with this site? <A HREF="mailto:help@truckerswelcome.ca?subject=Mail from TruckersWelcome">Email us</A>
-    <BR>
-    <A HREF=tos.html>Terms Of Service</A>
 </div>`;
 
     let marker = new google.maps.Marker({
