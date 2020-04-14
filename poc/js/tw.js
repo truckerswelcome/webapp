@@ -107,14 +107,16 @@ function initPage() {
                         }
 
                         // handle each error from data.form_errors
-                        for (let i = 0; i < data.formErrors.length; i++) {
-                            const idx = data.formErrors[i];
-                            if (idx == 'services') {
-                                servicesError.style.display = 'block';
-                            } else {
-                                const el = siteForm.elements[data.formErrors[i]];
-                                if (el)
-                                    el.classList.add('is-invalid');
+                        if (data.formErrors) {
+                            for (let i = 0; i < data.formErrors.length; i++) {
+                                const idx = data.formErrors[i];
+                                if (idx == 'services') {
+                                    servicesError.style.display = 'block';
+                                } else {
+                                    const el = siteForm.elements[data.formErrors[i]];
+                                    if (el)
+                                        el.classList.add('is-invalid');
+                                }
                             }
                         }
                     }
@@ -124,36 +126,53 @@ function initPage() {
             xhr.send(new FormData(siteForm));
             return false;
         });
+    }
 
-        if (deleteSiteButton) {
-            deleteSiteButton.addEventListener('click', () => {
-                if (confirm("Are you sure you want to delete this business?") === true) {
-                    siteForm.delete.value = 1;
-                    let xhr = new XMLHttpRequest();
-                    xhr.onreadystatechange = function () {
-                        if (xhr.readyState == 4) {
-                            xhr.onreadystatechange = function () { };
-                            let data = JSON.parse(xhr.responseText);
-                            // only show the close button now
-                            if (data.success) {
-                                siteModalMsg.innerText = 'Success';
-                                // should the modal be closed now?
-                                submitSiteButton.style.display = 'none';
-                                deleteSiteButton.style.display = 'none';
-                            } else {
-                                siteModalMsg.innerText = 'Error deleting business';
-                                if (data.sqlerror) {
-                                    siteModalMsg2.innerText = data.sqlerror.join('<br/>');
+    if (deleteSiteButton) {
+        deleteSiteButton.addEventListener('click', () => {
+            if (confirm("Are you sure you want to delete this business?") === true) {
+                siteForm.delete.value = 1;
+                let xhr = new XMLHttpRequest();
+                xhr.onreadystatechange = function () {
+                    if (xhr.readyState == 4) {
+                        xhr.onreadystatechange = function () { };
+                        let data = JSON.parse(xhr.responseText);
+                        // only show the close button now
+                        if (data.success) {
+                            siteModalMsg.innerText = 'Success';
+                            // should the modal be closed now?
+                            submitSiteButton.style.display = 'none';
+                            deleteSiteButton.style.display = 'none';
+                        } else {
+                            // generate another recaptcha token
+                            generateRecaptcha();
+
+                            siteModalMsg.innerText = 'Error deleting business';
+                            if (data.sqlerror) {
+                                siteModalMsg2.innerText = data.sqlerror.join('<br/>');
+                            }
+
+                            // handle each error from data.form_errors
+                            if (data.formErrors) {
+                                for (let i = 0; i < data.formErrors.length; i++) {
+                                    const idx = data.formErrors[i];
+                                    if (idx == 'services') {
+                                        servicesError.style.display = 'block';
+                                    } else {
+                                        const el = siteForm.elements[data.formErrors[i]];
+                                        if (el)
+                                            el.classList.add('is-invalid');
+                                    }
                                 }
                             }
                         }
-                    };
-                    xhr.open('POST', 'site.php', true);
-                    xhr.send(new FormData(siteForm));
-                }
-                return false;
-            });
-        }
+                    }
+                };
+                xhr.open('POST', 'site.php', true);
+                xhr.send(new FormData(siteForm));
+            }
+            return false;
+        });
     }
 
     startSearchButton.addEventListener('click', () => {
@@ -186,9 +205,9 @@ function initPage() {
 
         $('#start-modal').modal('hide');
     });
-    
+
     if (window.location.href.indexOf("about") > -1) {
-       openAboutModal();
+        openAboutModal();
     }
 }
 
@@ -214,6 +233,13 @@ function openTermsOfServiceModal() {
     $('#tos-modal').modal('show');
     closeSidenav();
     return false;
+}
+
+function htmlDecode(input) {
+    var e = document.createElement('textarea');
+    e.innerHTML = input;
+    // handle case of empty input
+    return e.childNodes.length === 0 ? "" : e.childNodes[0].nodeValue;
 }
 
 $('div.modal').on('show.bs.modal', function () {
@@ -446,7 +472,7 @@ function getSite(id) {
             siteForm.meal.checked = data.meal == 1;
             siteForm.drivethrough.checked = data.drivethrough == 1;
             siteForm.walkup.checked = data.walkthrough == 1;
-            siteForm.other.value = data.otherservices;
+            siteForm.other.value = htmlDecode(data.otherservices);
             generateRecaptcha();
 
             submitSiteButton.style.display = 'block';

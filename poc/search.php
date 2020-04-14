@@ -108,7 +108,7 @@ if ($useAllOptions || $optionCount > 0) {
             'website'        => sanitize($row['website']),
             'lat'            => sanitize($row['lat']),
             'lng'            => sanitize($row['lng']),
-            'services_list'  => implode(', ', $services),
+            'services_list'  => sanitize(implode(', ', $services)),
             'distance'       => sprintf("%0.1f", $row['distance'])
         ];
     }

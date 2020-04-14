@@ -50,20 +50,20 @@ function getSiteObjectInput($inputType) {
    $obj = [];
 
    $filters = [
-      'uname' => FILTER_SANITIZE_STRING,
-      'whoareyou' => FILTER_SANITIZE_STRING,
-      'bizname' => FILTER_SANITIZE_STRING,
-      'street' => FILTER_SANITIZE_STRING,
-      'city' => FILTER_SANITIZE_STRING,
-      'province' => FILTER_SANITIZE_STRING,
-      'country' => FILTER_SANITIZE_STRING,
-      'postal' => FILTER_SANITIZE_STRING,
-      'bemail' => FILTER_SANITIZE_STRING,
-      'phone' => FILTER_SANITIZE_STRING,
-      'website' => FILTER_SANITIZE_STRING,
+      'uname' => FILTER_DEFAULT,
+      'whoareyou' => FILTER_DEFAULT,
+      'bizname' => FILTER_DEFAULT,
+      'street' => FILTER_DEFAULT,
+      'city' => FILTER_DEFAULT,
+      'province' => FILTER_DEFAULT,
+      'country' => FILTER_DEFAULT,
+      'postal' => FILTER_DEFAULT,
+      'bemail' => FILTER_DEFAULT,
+      'phone' => FILTER_DEFAULT,
+      'website' => FILTER_DEFAULT,
       'entryid' => FILTER_SANITIZE_NUMBER_INT,
-      'modpin' => FILTER_SANITIZE_STRING,
-      'other' => FILTER_SANITIZE_STRING,
+      'modpin' => FILTER_DEFAULT,
+      'other' => FILTER_DEFAULT,
       'diesel' => FILTER_DEFAULT,
       'washroom' => FILTER_DEFAULT,
       'shower' => FILTER_DEFAULT,
@@ -133,7 +133,8 @@ function validateInput($obj, &$approval_status) {
    if (strlen($obj['postal']) > 7 || empty($obj['postal']))
       $form_errors[] = 'postal';
 
-   if (strlen($obj['bemail']) > 160)
+   $emailLength = strlen($obj['bemail']);
+   if ($emailLength > 160 || ($emailLength > 0 && filter_var($obj['bemail'], FILTER_VALIDATE_EMAIL) === false))
       $form_errors[] = 'bemail';
 
    if (strlen($obj['phone']) > 16)
