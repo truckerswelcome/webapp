@@ -174,38 +174,42 @@ function initPage() {
             return false;
         });
     }
-}
 
-startSearchButton.addEventListener('click', () => {
-    if (startForm === null)
-        return;
-    /*
-        const options = {
-            washroom: startForm.elements.washroom.checked,
-            shower: startForm.elements.shower.checked,
-            reststop: startForm.elements.reststop.checked,
-            coffee: startForm.elements.coffee.checked,
-            snacks: startForm.elements.snacks.checked,
-            meal: startForm.elements.meal.checked,
-            drivethrough: startForm.elements.drivethrough.checked,
-            walkthrough: startForm.elements.walkthrough.checked
+    startSearchButton.addEventListener('click', () => {
+        if (startForm === null)
+            return;
+        /*
+            const options = {
+                washroom: startForm.elements.washroom.checked,
+                shower: startForm.elements.shower.checked,
+                reststop: startForm.elements.reststop.checked,
+                coffee: startForm.elements.coffee.checked,
+                snacks: startForm.elements.snacks.checked,
+                meal: startForm.elements.meal.checked,
+                drivethrough: startForm.elements.drivethrough.checked,
+                walkthrough: startForm.elements.walkthrough.checked
+            }
+            let tmp = [];
+            for (let i in options) {
+                if (options[i])
+                    tmp.push(i);
+            }
+            hiddenOptionsInput.value = tmp.join(',');
+        */
+        if (startLocation.value.length == 0) {
+            alert('Please enter your location');
+            return false;
         }
-        let tmp = [];
-        for (let i in options) {
-            if (options[i])
-                tmp.push(i);
-        }
-        hiddenOptionsInput.value = tmp.join(',');
-    */
-    if (startLocation.value.length == 0) {
-        alert('Please enter your location');
-        return false;
+        searchLocation.value = startLocation.value;
+        doSearch();
+
+        $('#start-modal').modal('hide');
+    });
+
+    if (window.location.href.indexOf("about") > -1) {
+        openAboutModal();
     }
-    searchLocation.value = startLocation.value;
-    doSearch();
-
-    $('#start-modal').modal('hide');
-});
+}
 
 function openBusinessForm() {
     businessModalTitle.innerText = 'Add a Business';
@@ -510,8 +514,6 @@ function createMarker(result) {
     <a href="${mapsurl}">Open in Google Maps</a>
     <BR><BR>
     Problems with this site? <A HREF="mailto:help@truckerswelcome.ca?subject=Mail from TruckersWelcome">Email us</A>
-    <BR>
-    <A HREF=tos.html>Terms Of Service</A>
 </div>`;
 
     let marker = new google.maps.Marker({
