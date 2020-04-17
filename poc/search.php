@@ -1,5 +1,4 @@
 <?php
-
 require_once '/var/opt/webapp/nogit/creds.php';
 
 function sanitize($in) {
@@ -10,7 +9,7 @@ function geocode($location) {
     global $geokey;
     $toronto = [43.6532, -79.3832];
     $location = str_replace(" ","+",$location);
-    
+
     // Make a call to the Google Geocode API, to convert location to latitude/longitude
     $gpsurl = "https://maps.googleapis.com/maps/api/geocode/json?address=$location&key=$geokey";
     $gpsres = file_get_contents($gpsurl);
@@ -39,7 +38,7 @@ $options = filter_input(INPUT_POST, 'options', FILTER_SANITIZE_STRING);
 $optionList = [];
 $useAllOptions = false;
 if ($options === 'all') {
-    $useAllOptions = true; 
+    $useAllOptions = true;
 } else {
     foreach (explode(',', $options) as $opt) {
         switch ($opt) {
@@ -76,10 +75,10 @@ if ($useAllOptions || $optionCount > 0) {
     $whereOptions = ($optionCount > 0) ? ' AND (' . implode(' OR ', $optionList) . ')' : '';
 
     $query = <<<EOT
-    SELECT *, (3959 * acos(cos(radians(?)) * cos(radians(lat)) * cos(radians(lng) - radians(?)) + sin(radians(?)) * sin(radians(lat)))) AS distance 
-        FROM `facilities` WHERE approval_status='approved' AND active=1 $whereOptions HAVING distance < ? 
+    SELECT *, (3959 * acos(cos(radians(?)) * cos(radians(lat)) * cos(radians(lng) - radians(?)) + sin(radians(?)) * sin(radians(lat)))) AS distance
+        FROM `facilities` WHERE approval_status='approved' AND active=1 $whereOptions HAVING distance < ?
         ORDER BY distance LIMIT 0 , 50;
-    EOT;
+EOT;
     $stmt = $dbh->prepare($query);
     $result = $stmt->execute([$latitude, $longitude, $latitude, $radius]);
     while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
@@ -110,9 +109,8 @@ if ($useAllOptions || $optionCount > 0) {
             'lng'            => sanitize($row['lng']),
             'services_list'  => sanitize(implode(', ', $services)),
             'distance'       => sprintf("%0.1f", $row['distance'])
-        ];
+	];
     }
 }
 
 echo json_encode($data);
-?>
