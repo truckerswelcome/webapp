@@ -87,67 +87,19 @@ function initPage() {
         submitSiteButton.addEventListener('click', () => {
             clearBusinessFormErrors();
 
-            let xhr = new XMLHttpRequest();
-            xhr.onreadystatechange = function () {
-                if (xhr.readyState == 4) {
-                    xhr.onreadystatechange = function () { };
-                    let data = JSON.parse(xhr.responseText);
-                    if (data.success) {
-                        siteModalMsg.innerText = 'Success';
-                        // should the modal be closed now?
-                        submitSiteButton.style.display = 'none';
-                        deleteSiteButton.style.display = 'none';
-                    } else {
-                        // generate another recaptcha token
-                        generateRecaptcha();
-
-                        siteModalMsg.innerText = 'Error updating business';
-                        if (data.sqlerror) {
-                            siteModalMsg2.innerText = data.sqlerror.join('<br/>');
-                        }
-
-                        // handle each error from data.form_errors
-                        if (data.formErrors) {
-                            for (let i = 0; i < data.formErrors.length; i++) {
-                                const idx = data.formErrors[i];
-                                if (idx == 'services') {
-                                    servicesError.style.display = 'block';
-                                } else {
-                                    const el = siteForm.elements[data.formErrors[i]];
-                                    if (el)
-                                        el.classList.add('is-invalid');
-                                }
-                            }
-                        }
-                    }
-                }
-            };
-            xhr.open('POST', 'site.php', true);
-            xhr.send(new FormData(siteForm));
-            return false;
-        });
-    }
-
-    if (deleteSiteButton) {
-        deleteSiteButton.addEventListener('click', () => {
-            if (confirm("Are you sure you want to delete this business?") === true) {
-                siteForm.delete.value = 1;
+            generateRecaptcha(() => {
                 let xhr = new XMLHttpRequest();
                 xhr.onreadystatechange = function () {
                     if (xhr.readyState == 4) {
                         xhr.onreadystatechange = function () { };
                         let data = JSON.parse(xhr.responseText);
-                        // only show the close button now
                         if (data.success) {
                             siteModalMsg.innerText = 'Success';
                             // should the modal be closed now?
                             submitSiteButton.style.display = 'none';
                             deleteSiteButton.style.display = 'none';
                         } else {
-                            // generate another recaptcha token
-                            generateRecaptcha();
-
-                            siteModalMsg.innerText = 'Error deleting business';
+                            siteModalMsg.innerText = 'Error updating business';
                             if (data.sqlerror) {
                                 siteModalMsg2.innerText = data.sqlerror.join('<br/>');
                             }
@@ -170,6 +122,53 @@ function initPage() {
                 };
                 xhr.open('POST', 'site.php', true);
                 xhr.send(new FormData(siteForm));
+            });
+
+            return false;
+        });
+    }
+
+    if (deleteSiteButton) {
+        deleteSiteButton.addEventListener('click', () => {
+            if (confirm("Are you sure you want to delete this business?") === true) {
+                siteForm.delete.value = 1;
+                generateRecaptcha(() => {
+                    let xhr = new XMLHttpRequest();
+                    xhr.onreadystatechange = function () {
+                        if (xhr.readyState == 4) {
+                            xhr.onreadystatechange = function () { };
+                            let data = JSON.parse(xhr.responseText);
+                            // only show the close button now
+                            if (data.success) {
+                                siteModalMsg.innerText = 'Success';
+                                // should the modal be closed now?
+                                submitSiteButton.style.display = 'none';
+                                deleteSiteButton.style.display = 'none';
+                            } else {
+                                siteModalMsg.innerText = 'Error deleting business';
+                                if (data.sqlerror) {
+                                    siteModalMsg2.innerText = data.sqlerror.join('<br/>');
+                                }
+
+                                // handle each error from data.form_errors
+                                if (data.formErrors) {
+                                    for (let i = 0; i < data.formErrors.length; i++) {
+                                        const idx = data.formErrors[i];
+                                        if (idx == 'services') {
+                                            servicesError.style.display = 'block';
+                                        } else {
+                                            const el = siteForm.elements[data.formErrors[i]];
+                                            if (el)
+                                                el.classList.add('is-invalid');
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    };
+                    xhr.open('POST', 'site.php', true);
+                    xhr.send(new FormData(siteForm));
+                });
             }
             return false;
         });
@@ -214,7 +213,6 @@ function initPage() {
 function openBusinessForm() {
     businessModalTitle.innerText = 'Add a Business';
     clearBusinessForm();
-    generateRecaptcha();
     submitSiteButton.style.display = 'block';
     deleteSiteButton.style.display = 'none';
     businessModalTitle.innerText = 'Add a Business';
@@ -258,11 +256,12 @@ $('div.modal').on('hide', function () {
     history.pushState('', document.title, window.location.pathname);
 });
 
-function generateRecaptcha() {
+function generateRecaptcha(callback) {
     grecaptcha.ready(function () {
         grecaptcha.execute('6LeujegUAAAAAImDheP5SG6ph54m55PIU1gLfkKT', { action: 'contact' }).then(function (token) {
             const recaptchaResponse = document.getElementById('recaptchaResponse');
             recaptchaResponse.value = token;
+            callback();
         });
     });
 }
@@ -475,7 +474,6 @@ function getSite(id) {
             siteForm.drivethrough.checked = data.drivethrough == 1;
             siteForm.walkup.checked = data.walkthrough == 1;
             siteForm.other.value = htmlDecode(data.otherservices);
-            generateRecaptcha();
 
             submitSiteButton.style.display = 'block';
             deleteSiteButton.style.display = 'block';
