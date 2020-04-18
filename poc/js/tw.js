@@ -100,8 +100,8 @@ function initPage() {
                             deleteSiteButton.style.display = 'none';
                         } else {
                             let msg = 'Error updating business';
-                            if (data.sqlerror) {
-                                msg += '<br/>' + data.sqlerror.join('<br/>');
+                            if (data.pgerror) {
+                                msg += '<br/>' + data.pgerror + '<br/>';
                             }
                             updateSiteNotification(false, msg);
 
@@ -147,8 +147,8 @@ function initPage() {
                                 deleteSiteButton.style.display = 'none';
                             } else {
                                 let msg = 'Error deleting business';
-                                if (data.sqlerror) {
-                                    msg += '<br/>' + data.sqlerror.join('<br/>');
+                                if (data.pgerror) {
+                                    msg += '<br/>' + data.pgerror + '<br/>';
                                 }
                                 updateSiteNotification(false, msg);
 
