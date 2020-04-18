@@ -161,6 +161,17 @@ function validateInput($obj, &$approval_status) {
       }
    }
 
+   $ip = getPosterIpAddr();
+   $ipOk = validate_poster($ip);
+   if (strcmp($obj['whoareyou'], "Moderator")){
+      // Non-moderators are rate-limited, so check this IP
+      if (!$ipOk){
+         $form_errors[] = 'uname';
+         $form_errors[] = 'ip';
+      }
+   }
+   doUpdatePoster($ip);   
+
    // Additional data format validation as appropriate
    $obj['postal'] = str_replace(" ","", $obj['postal']);
    $obj['postal'] = str_replace("-","", $obj['postal']);
@@ -246,11 +257,7 @@ EOD;
    if ($sth->execute($parameters) === TRUE) {
       $result['success'] = true;
    } else {
-      $result['sqlerror'] = [
-         'errorInfo' => print_r($sth->errorInfo(), true),
-         'statement' => $sql,
-         'parameters' => print_r($parameters, true)
-      ];
+      $result['pgerror'] = print_r($sth->errorInfo(), true) . ", statement $sql, parameters" . print_r($parameters, true);
    }
    return $result;
 }
@@ -293,11 +300,7 @@ EOD;
    if ($sth->execute($parameters) === TRUE) {
       $result['success'] = true;
    } else {
-      $result['sqlerror'] = [
-         'errorInfo' => print_r($sth->errorInfo(), true),
-         'statement' => $sql,
-         'parameters' => print_r($parameters, true)
-      ];
+      $result['pgerror'] = print_r($sth->errorInfo(), true) . ", statement $sql, parameters" . print_r($parameters, true);
    }
    return $result;
 }
@@ -349,6 +352,9 @@ function processPost() {
 
    if (count($form_errors) > 0) {
       $result = ['success' => false, 'formErrors' => $form_errors];
+      if (in_array('ip',$form_errors)){
+         $result['pgerror'] = "Please try again later.";
+      }
    } else { 
       if ($obj['entryid'] > 0) {
          $result = doUpdate($obj, $lat, $long, $approval_status);
@@ -357,6 +363,43 @@ function processPost() {
       }
    }
    return $result;
+}
+
+function validate_poster($ip){
+   global $dbh;
+   
+   // purge any old data for this IP address
+   $sth = $dbh->prepare('DELETE from lastpost where ipaddr = ? and actiontime < NOW() - INTERVAL 7 DAY');
+   $sth->execute([$ip]);
+   
+   // Now count how many actions have been completed from this IP in the last 3 minutes
+   $sth = $dbh->prepare('SELECT COUNT(*) as COUNT from lastpost where ipaddr = ? and actiontime > NOW() - INTERVAL 3 MINUTE');
+   if ($sth->execute([$ip]) === TRUE && $sth->rowCount()) {
+      $row = $sth->fetch(PDO::FETCH_ASSOC);
+      $actions = $row['COUNT'];
+      syslog(LOG_DEBUG,"Found $actions for $ip");
+      if ($actions > 3){
+         return false;
+      }
+   }
+   return true;
+}
+
+function doUpdatePoster($ip){
+   global $dbh;
+   $sth = $dbh->prepare('REPLACE INTO lastpost set ipaddr=?');
+   $sth->execute([$ip]);
+}
+
+function getPosterIpAddr(){
+    if(!empty($_SERVER['HTTP_CLIENT_IP'])){
+        $ip = $_SERVER['HTTP_CLIENT_IP'];
+    }elseif(!empty($_SERVER['HTTP_X_FORWARDED_FOR'])){
+        $ip = $_SERVER['HTTP_X_FORWARDED_FOR'];
+    }else{
+        $ip = $_SERVER['REMOTE_ADDR'];
+    }
+    return $ip;
 }
 
 $response = false;
