@@ -34,6 +34,7 @@ const siteModalMsg = document.querySelector('#modal-msg');
 const siteModalMsg2 = document.querySelector('#modal-msg2');
 const submitSiteButton = document.querySelector('#submit-site-button');
 const deleteSiteButton = document.querySelector('#delete-site-button');
+const siteNotification = document.querySelector('.site-notification');
 
 const toronto = {
     lat: 43.6532,
@@ -85,6 +86,7 @@ function initPage() {
 
     if (submitSiteButton) {
         submitSiteButton.addEventListener('click', () => {
+            hideSideNotification();
             clearBusinessFormErrors();
 
             generateRecaptcha(() => {
@@ -131,6 +133,9 @@ function initPage() {
 
     if (deleteSiteButton) {
         deleteSiteButton.addEventListener('click', () => {
+            hideSideNotification();
+            clearBusinessFormErrors();
+
             if (confirm("Are you sure you want to delete this business?") === true) {
                 siteForm.delete.value = 1;
                 generateRecaptcha(() => {
@@ -213,7 +218,6 @@ function initPage() {
 }
 
 function updateSiteNotification(success, msg) {
-    const siteNotification = document.querySelector('.site-notification');
     let alertType = success ? 'alert-success' : 'alert-danger';
     siteNotification.innerHTML = `
 <div class="alert ${alertType} alert-dismissible fade show" role="alert">
@@ -224,9 +228,14 @@ function updateSiteNotification(success, msg) {
 </div>`;
 }
 
+function hideSideNotification() {
+    siteNotification.innerHTML = '';
+}
+
 function openBusinessForm() {
     businessModalTitle.innerText = 'Add a Business';
     clearBusinessForm();
+    hideSideNotification();
     submitSiteButton.style.display = 'block';
     deleteSiteButton.style.display = 'none';
     businessModalTitle.innerText = 'Add a Business';
@@ -489,6 +498,7 @@ function getSite(id) {
             siteForm.walkup.checked = data.walkthrough == 1;
             siteForm.other.value = htmlDecode(data.otherservices);
 
+            hideSideNotification();
             submitSiteButton.style.display = 'block';
             deleteSiteButton.style.display = 'block';
 
