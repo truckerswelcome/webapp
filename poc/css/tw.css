@@ -181,6 +181,20 @@ main {
     display: none;
 }
 
+.site-notification {
+    bottom: 5em;
+    display: flex;
+    justify-content: center;
+    margin: 0;
+    position: absolute;
+    width: 100%;
+}
+
+.site-notification .alert {
+    margin-bottom: 0;
+    width: 95%;
+}
+
 .btn-link {
     border: none;
     outline: none;

@@ -94,15 +94,16 @@ function initPage() {
                         xhr.onreadystatechange = function () { };
                         let data = JSON.parse(xhr.responseText);
                         if (data.success) {
-                            siteModalMsg.innerText = 'Success';
+                            updateSiteNotification(true, 'Your change has been accepted.');
                             // should the modal be closed now?
                             submitSiteButton.style.display = 'none';
                             deleteSiteButton.style.display = 'none';
                         } else {
-                            siteModalMsg.innerText = 'Error updating business';
+                            let msg = 'Error updating business';
                             if (data.sqlerror) {
-                                siteModalMsg2.innerText = data.sqlerror.join('<br/>');
+                                msg += '<br/>' + data.sqlerror.join('<br/>');
                             }
+                            updateSiteNotification(false, msg);
 
                             // handle each error from data.form_errors
                             if (data.formErrors) {
@@ -140,15 +141,16 @@ function initPage() {
                             let data = JSON.parse(xhr.responseText);
                             // only show the close button now
                             if (data.success) {
-                                siteModalMsg.innerText = 'Success';
+                                updateSiteNotification(true, 'This record has been flagged for deletion.');
                                 // should the modal be closed now?
                                 submitSiteButton.style.display = 'none';
                                 deleteSiteButton.style.display = 'none';
                             } else {
-                                siteModalMsg.innerText = 'Error deleting business';
+                                let msg = 'Error deleting business';
                                 if (data.sqlerror) {
-                                    siteModalMsg2.innerText = data.sqlerror.join('<br/>');
+                                    msg += '<br/>' + data.sqlerror.join('<br/>');
                                 }
+                                updateSiteNotification(false, msg);
 
                                 // handle each error from data.form_errors
                                 if (data.formErrors) {
@@ -208,6 +210,18 @@ function initPage() {
     if (window.location.href.indexOf("about") > -1) {
         openAboutModal();
     }
+}
+
+function updateSiteNotification(success, msg) {
+    const siteNotification = document.querySelector('.site-notification');
+    let alertType = success ? 'alert-success' : 'alert-danger';
+    siteNotification.innerHTML = `
+<div class="alert ${alertType} alert-dismissible fade show" role="alert">
+    <span>${msg}</span>
+    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+        <span aria-hidden="true">&times;</span>
+    </button>
+</div>`;
 }
 
 function openBusinessForm() {
