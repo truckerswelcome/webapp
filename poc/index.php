@@ -11,7 +11,7 @@
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" />
 
     <title>Truckers Welcome</title>
-    <link rel="stylesheet" type="text/css" href="css/tw.css">
+    <link rel="stylesheet" type="text/css" href="css/tw.css?2">
 </head>
 <body> 
    <aside class="sidenav">
@@ -60,7 +60,7 @@
    require_once 'html/about.html';
    require_once 'html/tos.html';
    ?>
-   <script src="js/tw.js"></script>
+   <script src="js/tw.js?2"></script>
    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDpsl9O2zNsly1ygES951ava6Ckdtk5Wos&callback=initMap" async defer></script>
 </body>
 </html>
