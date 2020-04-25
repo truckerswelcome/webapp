@@ -24,6 +24,25 @@ function geocode($location) {
     return $toronto;
 }
 
+function getPosterIpAddr(){
+    if(!empty($_SERVER['HTTP_CLIENT_IP'])){
+        $ip = $_SERVER['HTTP_CLIENT_IP'];
+    }elseif(!empty($_SERVER['HTTP_X_FORWARDED_FOR'])){
+        $ip = $_SERVER['HTTP_X_FORWARDED_FOR'];
+    }else{
+        $ip = $_SERVER['REMOTE_ADDR'];
+    }
+    return $ip;
+}
+
+function log_search($dbh, $ip, $lat, $lng, $searchstring, $querystr, $numrows){
+    $query = <<<EOT
+    INSERT INTO searches set ip=?, lat=?, lng=?, searchstring=?, query=?, numentries=?;
+EOT;
+    $stmt = $dbh->prepare($query);
+    $result = $stmt->execute([$ip, $lat, $lng, $searchstring, $querystr, $numrows]);
+}   
+
 // if location is specified, then override the given lat/long
 $location = filter_input(INPUT_POST, 'location');
 if (strlen($location) > 0) {
@@ -81,7 +100,9 @@ if ($useAllOptions || $optionCount > 0) {
 EOT;
     $stmt = $dbh->prepare($query);
     $result = $stmt->execute([$latitude, $longitude, $latitude, $radius]);
+    $numRows=0;
     while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+        $numRows++;
         $services = [];
         if ($row["diesel"] == 1) $services[] = "Diesel";
         if ($row["washroom"] == 1) $services[] = "Washroom";
@@ -109,8 +130,11 @@ EOT;
             'lng'            => sanitize($row['lng']),
             'services_list'  => sanitize(implode(', ', $services)),
             'distance'       => sprintf("%0.1f", $row['distance'])
-	];
+         ];
     }
+    $ip = getPosterIpAddr();
+    $queryLog = "$query, [$latitude, $longitude, $latitude, $radius]";
+    log_search($dbh, $ip, $latitude, $longitude, $location, $queryLog, $numRows);
 }
 
 echo json_encode($data);
