@@ -28,6 +28,6 @@ cat <<EOT >> /tmp/nreport.html
 EOT
 
 if test -f "/tmp/nreport.html"; then
-  mv /tmp/nreport.html /var/www/html/nreport.php
+  mv /tmp/nreport.html /var/www/html/stats/index.php
 fi
 
